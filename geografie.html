@@ -52,9 +52,8 @@
             transform: translate(-50%, -50%) scale(1.2);
             z-index: 10;
         }
-        .map-pin:hover { background: #3182ce; color: white; }
 
-        .stats-bar { font-size: 0.9rem; color: #718096; margin-bottom: 10px; font-weight: bold; }
+        .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
         .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; }
         
         /* Eingabe- und Antwortbereiche */
@@ -81,8 +80,9 @@
         <div class="setup-group">
             <label>Schwierigkeitsstufe:</label>
             <select id="difficulty-level">
+                <option value="adaptive">⚡ Adaptiv (Startet Stufe 1, steigt bei Erfolg auf!)</option>
                 <option value="1">Stufe 1: Multiple Choice (Mit Auswahlmöglichkeiten)</option>
-                <option value="2" selected>Stufe 2: Mit Nummernhilfe (Tippen / Karte)</option>
+                <option value="2">Stufe 2: Mit Nummernhilfe (Tippen / Karte)</option>
                 <option value="3">Stufe 3: Experten-Modus (Ohne Nummernhilfe)</option>
             </select>
         </div>
@@ -101,15 +101,18 @@
             <select id="question-limit">
                 <option value="5">5 Fragen</option>
                 <option value="10" selected>10 Fragen</option>
-                <option value="all">Alle verfügbaren Fragen</option>
+                <option value="all">Alle verfügbaren Fragen (<span id="total-db-count">0</span>)</option>
             </select>
         </div>
 
-        <button class="action-btn" onclick="startTraining()">Prüfung starten 🚀</button>
+        <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
     </div>
 
     <!-- SPIELBEREICH -->
-    <div class="stats-bar" id="stats-bar" style="display: none;">Frage <span id="current-q-num">1</span> von <span id="total-q-num">0</span></div>
+    <div class="stats-bar" id="stats-bar" style="display: none;">
+        <span>Frage <span id="current-q-num">1</span> von <span id="total-q-num">0</span></span>
+        <span>Stufe: <span id="current-level-display">1</span></span>
+    </div>
 
     <div class="map-wrapper" id="map-wrapper">
         <img src="europa_karte.png" alt="Stumme Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
@@ -133,31 +136,38 @@
 <script>
     let activeQuestions = [];
     let currentIndex = 0;
-    let currentLevel = 2;
-    let currentQuestionData = null;
+    let selectedLevelSetting = "adaptive";
+    let currentActiveLevel = 1;
 
-    // Koordinaten für die Pins auf der Karte
+    // Korrigierte Prozent-Koordinaten für deine Stepmap-Karte
     const koordinatenMap = {
-        1: { x: 34, y: 52 }, 
-        2: { x: 26, y: 58 }, 
-        3: { x: 44, y: 64 }, 
-        4: { x: 45, y: 48 }
+        1: { x: 34, y: 52 }, // Frankreich
+        2: { x: 26, y: 58 }, // Spanien
+        3: { x: 44, y: 64 }, // Italien
+        4: { x: 45, y: 48 }  // Deutschland
     };
 
+    function init() {
+        if (typeof europaDatenbank !== 'undefined') {
+            document.getElementById("total-db-count").textContent = europaDatenbank.length * 2;
+        }
+    }
+
     function startTraining() {
-        currentLevel = parseInt(document.getElementById("difficulty-level").value);
+        selectedLevelSetting = document.getElementById("difficulty-level").value;
+        currentActiveLevel = (selectedLevelSetting === "adaptive") ? 1 : parseInt(selectedLevelSetting);
+        
         let topic = document.getElementById("train-topic").value;
         let limitVal = document.getElementById("question-limit").value;
 
-        // Fragen generieren basierend auf der europaDatenbank
         let generatedPool = [];
         europaDatenbank.forEach(item => {
             if (topic === "mixed" || topic === "capital") {
-                generatedPool.push({ type: "capital", item: item, prompt: getPromptText("capital", item, currentLevel), answer: item.hauptstadt });
-                generatedPool.push({ type: "country", item: item, prompt: getPromptText("country", item, currentLevel), answer: item.land });
+                generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt });
+                generatedPool.push({ type: "country", item: item, answer: item.land });
             }
             if (topic === "mixed" || topic === "region") {
-                generatedPool.push({ type: "region", item: item, prompt: getPromptText("region", item, currentLevel), answer: item.region });
+                generatedPool.push({ type: "region", item: item, answer: item.region });
             }
         });
 
@@ -165,39 +175,18 @@
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
 
-        if (activeQuestions.length === 0) return;
+        if (activeQuestions.length === 0) {
+            alert("Keine Fragen gefunden!");
+            return;
+        }
 
         document.getElementById("setup-screen").style.display = "none";
-        document.getElementById("stats-bar").style.display = "block";
+        document.getElementById("stats-bar").style.display = "flex";
         document.getElementById("map-wrapper").style.display = "block";
         document.getElementById("geo-question").style.display = "block";
 
-        if (currentLevel === 1) {
-            document.getElementById("mc-container").style.display = "grid";
-        } else {
-            document.getElementById("geo-answer").style.display = "block";
-            document.getElementById("check-btn").style.display = "block";
-        }
-
         currentIndex = 0;
         loadQuestion();
-    }
-
-    function getPromptText(type, item, level) {
-        if (level === 3) {
-            // Experten-Modus ohne Nummern
-            if (type === "capital") return `Wie heißt die Hauptstadt von ${item.land}?`;
-            if (type === "country") return `Welches Land hat die Hauptstadt ${item.hauptstadt}?`;
-            if (type === "region") return `Zu welcher Region gehört ${item.land}?`;
-        } else if (level === 2) {
-            // Mit Nummernhilfe
-            if (type === "capital") return `Schau auf Karte Nr. ${item.nr}: Welche Hauptstadt gesucht?`;
-            if (type === "country") return `Welches Land verbirgt sich hinter Nr. ${item.nr}?`;
-            if (type === "region") return `Zu welcher Region gehört Land Nr. ${item.nr} (${item.land})?`;
-        } else {
-            // Stufe 1 Multiple Choice
-            return `(Nr. ${item.nr}) Was passt zu ${item.land}?`;
-        }
     }
 
     function loadQuestion() {
@@ -212,20 +201,50 @@
             return;
         }
 
-        currentQuestionData = activeQuestions[currentIndex];
+        let qData = activeQuestions[currentIndex];
         document.getElementById("current-q-num").textContent = currentIndex + 1;
         document.getElementById("total-q-num").textContent = activeQuestions.length;
+        document.getElementById("current-level-display").textContent = currentActiveLevel;
 
-        document.getElementById("geo-question").textContent = currentQuestionData.prompt;
-        document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${currentQuestionData.item.tipp}`;
+        // Fragestellung exakt nach Schwierigkeitsgrad definieren
+        let promptText = "";
+        let activePinNr = null;
+
+        if (currentActiveLevel === 3) {
+            // Stufe 3: Ohne Nummernhilfe / Expertenmodus
+            if (qData.type === "capital") promptText = `Wie heißt die Hauptstadt von ${qData.item.land}?`;
+            if (qData.type === "country") promptText = `Welches Land hat die Hauptstadt ${qData.item.hauptstadt}?`;
+            if (qData.type === "region") promptText = `Zu welcher Region gehört ${qData.item.land}?`;
+            activePinNr = null; // Keine Markierung auf der Karte
+        } else if (currentActiveLevel === 2) {
+            // Stufe 2: Mit Nummernhilfe
+            if (qData.type === "capital") promptText = `Schau auf Karte Nr. ${qData.item.nr}: Welche Hauptstadt gesucht?`;
+            if (qData.type === "country") promptText = `Welches Land verbirgt sich hinter Nr. ${qData.item.nr}?`;
+            if (qData.type === "region") promptText = `Zu welcher Region gehört Land Nr. ${qData.item.nr}?`;
+            activePinNr = qData.item.nr;
+        } else {
+            // Stufe 1: Multiple Choice mit Nummernhilfe
+            promptText = `(Nr. ${qData.item.nr}) Was passt zu ${qData.item.land}?`;
+            activePinNr = qData.item.nr;
+        }
+
+        document.getElementById("geo-question").textContent = promptText;
+        document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${qData.item.tipp}`;
         document.getElementById("geo-tip").style.display = "block";
         document.getElementById("geo-feedback").textContent = "";
 
-        renderMapPins(currentLevel === 3 ? null : currentQuestionData.item.nr);
+        renderMapPins(activePinNr);
 
-        if (currentLevel === 1) {
-            renderMultipleChoice(currentQuestionData);
+        // UI umschalten je nach Stufe (Input vs Multiple Choice)
+        if (currentActiveLevel === 1) {
+            document.getElementById("mc-container").style.display = "grid";
+            document.getElementById("geo-answer").style.display = "none";
+            document.getElementById("check-btn").style.display = "none";
+            renderMultipleChoice(qData);
         } else {
+            document.getElementById("mc-container").style.display = "none";
+            document.getElementById("geo-answer").style.display = "block";
+            document.getElementById("check-btn").style.display = "block";
             document.getElementById("geo-answer").value = "";
             document.getElementById("geo-answer").focus();
         }
@@ -244,7 +263,6 @@
             pin.style.left = `${pos.x}%`;
             pin.style.top = `${pos.y}%`;
             pin.textContent = nr;
-            
             container.appendChild(pin);
         }
     }
@@ -271,8 +289,9 @@
     }
 
     function checkAnswer(selectedOpt = null) {
+        let qData = activeQuestions[currentIndex];
         let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value.trim().toLowerCase();
-        let correctAnswer = currentQuestionData.answer.toLowerCase();
+        let correctAnswer = qData.answer.toLowerCase();
 
         let isCorrect = (userAnswer === correctAnswer || correctAnswer.includes(userAnswer));
 
@@ -284,15 +303,27 @@
             let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
             localStorage.setItem(`stats_geo_${user}`, count);
 
+            // ADAPTIVE SCHWIERIGKEIT: Bei Erfolg im Adaptiv-Modus eine Stufe höher steigen (max Stufe 3)
+            if (selectedLevelSetting === "adaptive" && currentActiveLevel < 3) {
+                currentActiveLevel++;
+            }
+
             setTimeout(() => {
                 currentIndex++;
                 loadQuestion();
             }, 1200);
         } else {
             document.getElementById("geo-feedback").style.color = "red";
-            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${currentQuestionData.answer}`;
+            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer}`;
+            
+            // Bei Fehler im Adaptiv-Modus ggf. auf Stufe 1 zurückfallen zur Frustvermeidung
+            if (selectedLevelSetting === "adaptive") {
+                currentActiveLevel = Math.max(1, currentActiveLevel - 1);
+            }
         }
     }
+
+    init();
 </script>
 
 </body>

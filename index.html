@@ -9,7 +9,7 @@
         .container { background: white; width: 100%; max-width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         h1 { color: #2b6cb0; margin-bottom: 10px; }
         .profile-box { background: #ebf8ff; padding: 15px; border-radius: 10px; margin-bottom: 25px; }
-        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; font-size: 1rem; border: 1px solid #cbd5e0; box-sizing: border-box; }
+        select, input, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; font-size: 1rem; border: 1px solid #cbd5e0; box-sizing: border-box; }
         button { background: #2b6cb0; color: white; border: none; font-weight: bold; cursor: pointer; }
         button:hover { background: #2c5282; }
         .menu-grid { display: grid; gap: 15px; margin-top: 20px; }
@@ -27,7 +27,7 @@
     <div class="profile-box">
         <label for="user-select"><b>Wer lernt gerade?</b></label>
         <select id="user-select" onchange="checkUserAuth()">
-            <!-- Wird dynamisch aus daten.js gefüllt -->
+            <!-- Wird dynamisch aus daten.js geladen -->
         </select>
         
         <div id="auth-modal">
@@ -51,6 +51,7 @@
     </div>
 </div>
 
+<!-- WICHTIG: daten.js muss als Erstes geladen werden, damit die Config da ist! -->
 <script src="daten.js"></script>
 <script>
     const userSelect = document.getElementById("user-select");

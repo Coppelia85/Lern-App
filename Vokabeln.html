@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabel-Trainer (Hierarchie)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #2b6cb0; text-align: center; }
+        .filter-box { background: #ebf8ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .filter-group { margin-bottom: 10px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; }
+        .card { background: #fffaf0; border: 2px solid #dd6b20; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; display: none; }
+        button.action-btn { background: #2b6cb0; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button.action-btn:hover { background: #2c5282; }
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html">⬅ Zurück zum Menü</a>
+    <h1>📖 Vokabel-Trainer</h1>
+
+    <!-- Hierarchische Filter-Auswahl -->
+    <div class="filter-box">
+        <div class="filter-group">
+            <label>1. Klassenstufe:</label>
+            <select id="filter-klasse" onchange="updateSprachen()"><option value="">-- Bitte wählen --</option></select>
+        </div>
+        <div class="filter-group">
+            <label>2. Sprache:</label>
+            <select id="filter-sprache" onchange="updateUnits()" disabled><option value="">-- Erst Klassenstufe wählen --</option></select>
+        </div>
+        <div class="filter-group">
+            <label>3. Unit / Kapitel:</label>
+            <select id="filter-unit" onchange="updateSeiten()" disabled><option value="">-- Erst Sprache wählen --</option></select>
+        </div>
+        <div class="filter-group">
+            <label>4. Seitenzahl:</label>
+            <select id="filter-seite" disabled><option value="">-- Erst Unit wählen --</option></select>
+        </div>
+        <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
+    </div>
+
+    <!-- Lernbereich -->
+    <div id="training-area" class="card">
+        <h3 id="vocab-prompt" style="color: #dd6b20;">Fremdwort</h3>
+        <p id="vocab-merksatz" style="font-size: 0.9rem; color: #718096; font-style: italic;"></p>
+        <input type="text" id="vocab-answer" placeholder="Deutsche Übersetzung eingeben...">
+        <button class="action-btn" onclick="checkVocabAnswer()">Prüfen</button>
+        <p id="vocab-feedback" style="font-weight: bold; margin-top: 10px;"></p>
+    </div>
+</div>
+
+<script src="daten.js"></script>
+<script>
+    const selKlasse = document.getElementById("filter-klasse");
+    const selSprache = document.getElementById("filter-sprache");
+    const selUnit = document.getElementById("filter-unit");
+    const selSeite = document.getElementById("filter-seite");
+    const trainingArea = document.getElementById("training-area");
+    
+    let activeVocabs = [];
+    let currentIndex = 0;
+
+    function initFilter() {
+        let klassen = [...new Set(vokabelDatenbank.map(v => v.klasse))];
+        selKlasse.innerHTML = '<option value="all">-- Alle Klassenstufen ("Alles") --</option>' + klassen.map(k => `<option value="${k}">${k}</option>`).join('');
+    }
+
+    function updateSprachen() {
+        selSprache.disabled = false;
+        let k = selKlasse.value;
+        let data = k === "all" ? vokabelDatenbank : vokabelDatenbank.filter(v => v.klasse === k);
+        let sprachen = [...new Set(data.map(v => v.sprache))];
+        selSprache.innerHTML = '<option value="all">-- Alle Sprachen ("Alles") --</option>' + sprachen.map(s => `<option value="${s}">${s}</option>`).join('');
+        selUnit.disabled = true; selSeite.disabled = true;
+    }
+
+    function updateUnits() {
+        selUnit.disabled = false;
+        let k = selKlasse.value;
+        let s = selSprache.value;
+        let data = vokabelDatenbank;
+        if (k !== "all") data = data.filter(v => v.klasse === k);
+        if (s !== "all") data = data.filter(v => v.sprache === s);
+        let units = [...new Set(data.map(v => v.unit))];
+        selUnit.innerHTML = '<option value="all">-- Alle Units ("Alles") --</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+        selSeite.disabled = true;
+    }
+
+    function updateSeiten() {
+        selSeite.disabled = false;
+        let k = selKlasse.value;
+        let s = selSprache.value;
+        let u = selUnit.value;
+        let data = vokabelDatenbank;
+        if (k !== "all") data = data.filter(v => v.klasse === k);
+        if (s !== "all") data = data.filter(v => v.sprache === s);
+        if (u !== "all") data = data.filter(v => v.unit === u);
+        let seiten = [...new Set(data.map(v => v.seite))];
+        selSeite.innerHTML = '<option value="all">-- Alle Seiten ("Alles") --</option>' + seiten.map(se => `<option value="${se}">Seite ${se}</option>`).join('');
+    }
+
+    function startTraining() {
+        let k = selKlasse.value;
+        let s = selSprache.value;
+        let u = selUnit.value;
+        let se = selSeite.value;
+
+        activeVocabs = vokabelDatenbank.filter(v => {
+            if (k !== "all" && v.klasse !== k) return false;
+            if (s !== "all" && v.sprache !== s) return false;
+            if (u !== "all" && v.unit !== u) return false;
+            if (se !== "all" && v.seite !== se) return false;
+            return true;
+        });
+
+        if (activeVocabs.length === 0) {
+            alert("Keine Vokabeln für diese Auswahl gefunden!");
+            return;
+        }
+
+        currentIndex = 0;
+        trainingArea.style.display = "block";
+        loadCurrentVocab();
+    }
+
+    function loadCurrentVocab() {
+        let v = activeVocabs[currentIndex];
+        document.getElementById("vocab-prompt").textContent = v.fremd;
+        document.getElementById("vocab-merksatz").textContent = v.merksatz ? `Merksatz: „${v.merksatz}“` : "";
+        document.getElementById("vocab-answer").value = "";
+        document.getElementById("vocab-feedback").textContent = "";
+    }
+
+    function checkVocabAnswer() {
+        let v = activeVocabs[currentIndex];
+        let userAnswer = document.getElementById("vocab-answer").value.trim().toLowerCase();
+        let correctAnswers = v.deutsch.toLowerCase().split(",").map(a => a.trim());
+
+        if (correctAnswers.some(ans => userAnswer.includes(ans))) {
+            document.getElementById("vocab-feedback.textContent").style.color = "green";
+            document.getElementById("vocab-feedback").textContent = "Richtig! Super! 🎉";
+            
+            // Statistik für aktiven User erhöhen
+            let user = localStorage.getItem("activeUser") || "Gast";
+            let count = parseInt(localStorage.getItem(`stats_vocab_${user}`) || 0) + 1;
+            localStorage.setItem(`stats_vocab_${user}`, count);
+
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex < activeVocabs.length) {
+                    loadCurrentVocab();
+                } else {
+                    alert("Glückwunsch! Alle Vokabeln in diesem Paket gelernt!");
+                    trainingArea.style.display = "none";
+                }
+            }, 1200);
+        } else {
+            document.getElementById("vocab-feedback").style.color = "red";
+            document.getElementById("vocab-feedback").textContent = `Fast! Richtig wäre: ${v.deutsch}`;
+        }
+    }
+
+    initFilter();
+</script>
+
+</body>
+</html>

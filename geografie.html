@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Europa-Geografie mit interaktiver Karte</title>
+    <title>Europa-Geografie Prüfungstrainer</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 700px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         h1 { color: #d69e2e; margin-top: 5px; font-size: 1.4rem; }
         
-        /* Karten-Container mit absoluter Positionierung für die Nummer-Pins */
+        /* Setup-Bildschirm */
+        .setup-box { background: #ebf8ff; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
+        .setup-group { margin-bottom: 12px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #2b6cb0; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; }
+
+        /* Karten-Container */
         .map-wrapper {
             position: relative;
             width: 100%;
@@ -18,147 +24,275 @@
             margin-bottom: 15px;
             overflow: hidden;
             background: #cbd5e0;
+            display: none;
         }
-        .map-wrapper img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
+        .map-wrapper img { width: 100%; height: auto; display: block; }
 
-        /* Die interaktiven Pins (Nummern auf der Karte) */
         .map-pin {
             position: absolute;
             transform: translate(-50%, -50%);
-            background: #e53e3e;
-            color: white;
+            background: #cbd5e0;
+            color: #2d3748;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             width: 24px;
             height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             border: 2px solid white;
+            cursor: pointer;
             transition: all 0.2s;
         }
-        .map-pin:hover, .map-pin.active {
-            background: #3182ce;
+        .map-pin.highlight {
+            background: #e53e3e;
+            color: white;
             transform: translate(-50%, -50%) scale(1.2);
             z-index: 10;
         }
+        .map-pin:hover { background: #3182ce; color: white; }
 
-        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; }
-        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; }
-        button { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        button:hover { background: #b7791f; }
-        .tip-box { background: #edf2f7; padding: 10px; border-radius: 6px; font-size: 0.9rem; color: #4a5568; margin-bottom: 12px; text-align: left; }
+        .stats-bar { font-size: 0.9rem; color: #718096; margin-bottom: 10px; font-weight: bold; }
+        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; }
+        
+        /* Eingabe- und Antwortbereiche */
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; display: none; }
+        .mc-grid { display: grid; gap: 10px; margin-bottom: 15px; display: none; }
+        .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500; text-align: left; }
+        .mc-btn:hover { border-color: #d69e2e; background: #fffaf0; }
+
+        .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .action-btn:hover { background: #b7791f; }
+        .tip-box { background: #edf2f7; padding: 10px; border-radius: 6px; font-size: 0.9rem; color: #4a5568; margin-bottom: 12px; text-align: left; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div style="text-align: left;"><a href="index.html">⬅ Zurück zum Menü</a></div>
-    <h1>🌍 Europa-Geografie mit interaktiver Karte</h1>
+    <h1>🌍 Europa-Geografie Prüfungstrainer</h1>
 
-    <!-- Karte mit dynamischen Pins -->
+    <!-- SETUP-BILDSCHIRM -->
+    <div id="setup-screen" class="setup-box">
+        <h3>Prüfungsvorbereitung konfigurieren:</h3>
+        
+        <div class="setup-group">
+            <label>Schwierigkeitsstufe:</label>
+            <select id="difficulty-level">
+                <option value="1">Stufe 1: Multiple Choice (Mit Auswahlmöglichkeiten)</option>
+                <option value="2" selected>Stufe 2: Mit Nummernhilfe (Tippen / Karte)</option>
+                <option value="3">Stufe 3: Experten-Modus (Ohne Nummernhilfe)</option>
+            </select>
+        </div>
+
+        <div class="setup-group">
+            <label>Themen / Fragetyp:</label>
+            <select id="train-topic">
+                <option value="mixed">Gemischt (Länder, Hauptstädte, Regionen)</option>
+                <option value="capital">Nur Hauptstädte abfragen</option>
+                <option value="region">Nur Regionen zuordnen</option>
+            </select>
+        </div>
+
+        <div class="setup-group">
+            <label>Anzahl der Fragen:</label>
+            <select id="question-limit">
+                <option value="5">5 Fragen</option>
+                <option value="10" selected>10 Fragen</option>
+                <option value="all">Alle verfügbaren Fragen</option>
+            </select>
+        </div>
+
+        <button class="action-btn" onclick="startTraining()">Prüfung starten 🚀</button>
+    </div>
+
+    <!-- SPIELBEREICH -->
+    <div class="stats-bar" id="stats-bar" style="display: none;">Frage <span id="current-q-num">1</span> von <span id="total-q-num">0</span></div>
+
     <div class="map-wrapper" id="map-wrapper">
         <img src="europa_karte.png" alt="Stumme Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
-        <!-- Hier werden die Nummern-Pins per JavaScript eingefügt -->
         <div id="pins-container"></div>
     </div>
 
-    <div class="question-box" id="geo-question">Frage lädt...</div>
+    <div class="question-box" id="geo-question"></div>
     <div id="geo-tip" class="tip-box"></div>
-    <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkGeoAnswer()">
-    <button onclick="checkGeoAnswer()">Antwort prüfen</button>
+
+    <!-- Eingabe für Stufe 2 & 3 -->
+    <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+    <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
+
+    <!-- Multiple Choice für Stufe 1 -->
+    <div class="mc-grid" id="mc-container"></div>
+
     <p id="geo-feedback" style="font-weight: bold; margin-top: 12px;"></p>
 </div>
 
 <script src="daten.js"></script>
 <script>
-    let geoIndex = 0;
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let currentLevel = 2;
+    let currentQuestionData = null;
 
-    // Ungefähre Prozent-Koordinaten (x, y) auf der Europakarte für die Nummern 1 bis 4
-    // (Diese können wir nach Belieben in daten.js oder hier anpassen, wenn das Bild anders skaliert ist)
+    // Koordinaten für die Pins auf der Karte
     const koordinatenMap = {
-        1: { x: 30, y: 55 }, // Frankreich (Paris)
-        2: { x: 22, y: 75 }, // Spanien (Madrid)
-        3: { x: 45, y: 68 }, // Italien (Rom)
-        4: { x: 48, y: 45 }  // Deutschland (Berlin)
+        1: { x: 34, y: 52 }, 
+        2: { x: 26, y: 58 }, 
+        3: { x: 44, y: 64 }, 
+        4: { x: 45, y: 48 }
     };
 
-    function loadGeoQuestion() {
-        if (geoIndex >= europaDatenbank.length) {
-            document.getElementById("geo-question").textContent = "🎉 Genial! Alle Geografie-Fragen erfolgreich gemeistert!";
+    function startTraining() {
+        currentLevel = parseInt(document.getElementById("difficulty-level").value);
+        let topic = document.getElementById("train-topic").value;
+        let limitVal = document.getElementById("question-limit").value;
+
+        // Fragen generieren basierend auf der europaDatenbank
+        let generatedPool = [];
+        europaDatenbank.forEach(item => {
+            if (topic === "mixed" || topic === "capital") {
+                generatedPool.push({ type: "capital", item: item, prompt: getPromptText("capital", item, currentLevel), answer: item.hauptstadt });
+                generatedPool.push({ type: "country", item: item, prompt: getPromptText("country", item, currentLevel), answer: item.land });
+            }
+            if (topic === "mixed" || topic === "region") {
+                generatedPool.push({ type: "region", item: item, prompt: getPromptText("region", item, currentLevel), answer: item.region });
+            }
+        });
+
+        generatedPool.sort(() => Math.random() - 0.5);
+        let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
+        activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
+
+        if (activeQuestions.length === 0) return;
+
+        document.getElementById("setup-screen").style.display = "none";
+        document.getElementById("stats-bar").style.display = "block";
+        document.getElementById("map-wrapper").style.display = "block";
+        document.getElementById("geo-question").style.display = "block";
+
+        if (currentLevel === 1) {
+            document.getElementById("mc-container").style.display = "grid";
+        } else {
+            document.getElementById("geo-answer").style.display = "block";
+            document.getElementById("check-btn").style.display = "block";
+        }
+
+        currentIndex = 0;
+        loadQuestion();
+    }
+
+    function getPromptText(type, item, level) {
+        if (level === 3) {
+            // Experten-Modus ohne Nummern
+            if (type === "capital") return `Wie heißt die Hauptstadt von ${item.land}?`;
+            if (type === "country") return `Welches Land hat die Hauptstadt ${item.hauptstadt}?`;
+            if (type === "region") return `Zu welcher Region gehört ${item.land}?`;
+        } else if (level === 2) {
+            // Mit Nummernhilfe
+            if (type === "capital") return `Schau auf Karte Nr. ${item.nr}: Welche Hauptstadt gesucht?`;
+            if (type === "country") return `Welches Land verbirgt sich hinter Nr. ${item.nr}?`;
+            if (type === "region") return `Zu welcher Region gehört Land Nr. ${item.nr} (${item.land})?`;
+        } else {
+            // Stufe 1 Multiple Choice
+            return `(Nr. ${item.nr}) Was passt zu ${item.land}?`;
+        }
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= activeQuestions.length) {
+            document.getElementById("geo-question").textContent = "🎉 Richtig stark! Du hast alle Fragen dieser Prüfungsrunde geschafft!";
             document.getElementById("geo-tip").style.display = "none";
             document.getElementById("geo-answer").style.display = "none";
-            document.querySelector("button").style.display = "none";
-            document.getElementById("pins-container").innerHTML = "";
+            document.getElementById("check-btn").style.display = "none";
+            document.getElementById("mc-container").style.display = "none";
+            document.getElementById("map-wrapper").style.display = "none";
+            document.getElementById("stats-bar").style.display = "none";
             return;
         }
 
-        let item = europaDatenbank[geoIndex];
-        document.getElementById("geo-question").textContent = `Schau auf die Karte: Welche Hauptstadt gehört zu Land Nr. ${item.nr} (${item.land})?`;
-        document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${item.tipp}`;
+        currentQuestionData = activeQuestions[currentIndex];
+        document.getElementById("current-q-num").textContent = currentIndex + 1;
+        document.getElementById("total-q-num").textContent = activeQuestions.length;
+
+        document.getElementById("geo-question").textContent = currentQuestionData.prompt;
+        document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${currentQuestionData.item.tipp}`;
         document.getElementById("geo-tip").style.display = "block";
-        document.getElementById("geo-answer").value = "";
         document.getElementById("geo-feedback").textContent = "";
 
-        renderPins(item.nr);
+        renderMapPins(currentLevel === 3 ? null : currentQuestionData.item.nr);
+
+        if (currentLevel === 1) {
+            renderMultipleChoice(currentQuestionData);
+        } else {
+            document.getElementById("geo-answer").value = "";
+            document.getElementById("geo-answer").focus();
+        }
     }
 
-    // Zeigt die Pins auf der Karte an (hebt die gesuchte Nummer hervor)
-    function renderPins(activeNr) {
+    function renderMapPins(activeNr) {
         const container = document.getElementById("pins-container");
         container.innerHTML = "";
 
-        // Wir zeigen alle bekannten Pins an, der gesuchte blinkt/leuchtet blau
         for (let nr in koordinatenMap) {
             let pos = koordinatenMap[nr];
             let pin = document.createElement("div");
-            pin.className = `map-pin ${parseInt(nr) === activeNr ? 'active' : ''}`;
+            let isTarget = (parseInt(nr) === activeNr);
+            
+            pin.className = `map-pin ${isTarget ? 'highlight' : ''}`;
             pin.style.left = `${pos.x}%`;
             pin.style.top = `${pos.y}%`;
             pin.textContent = nr;
-            pin.title = `Land / Punkt Nr. ${nr}`;
             
-            // Klick auf den Pin auf der Karte wählt ihn aus
-            pin.onclick = () => {
-                document.getElementById("geo-answer").value = europaDatenbank[geoIndex].hauptstadt;
-                checkGeoAnswer();
-            };
-
             container.appendChild(pin);
         }
     }
 
-    function checkGeoAnswer() {
-        let item = europaDatenbank[geoIndex];
-        let userAnswer = document.getElementById("geo-answer").value.trim().toLowerCase();
-        let correctAnswer = item.hauptstadt.toLowerCase();
+    function renderMultipleChoice(qData) {
+        const mcContainer = document.getElementById("mc-container");
+        mcContainer.innerHTML = "";
 
-        if (userAnswer === correctAnswer || correctAnswer.includes(userAnswer)) {
+        let options = [qData.answer];
+        while (options.length < 4) {
+            let randomItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
+            let val = qData.type === "capital" ? randomItem.hauptstadt : (qData.type === "country" ? randomItem.land : randomItem.region);
+            if (!options.includes(val)) options.push(val);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            let btn = document.createElement("button");
+            btn.className = "mc-btn";
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt);
+            mcContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedOpt = null) {
+        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value.trim().toLowerCase();
+        let correctAnswer = currentQuestionData.answer.toLowerCase();
+
+        let isCorrect = (userAnswer === correctAnswer || correctAnswer.includes(userAnswer));
+
+        if (isCorrect) {
             document.getElementById("geo-feedback").style.color = "green";
-            document.getElementById("geo-feedback").textContent = "Richtig! Stark gemacht! 🌟";
+            document.getElementById("geo-feedback").textContent = "Richtig! Super gemacht! 🌟";
 
             let user = localStorage.getItem("activeUser") || "Gast";
             let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
             localStorage.setItem(`stats_geo_${user}`, count);
 
             setTimeout(() => {
-                geoIndex++;
-                loadGeoQuestion();
+                currentIndex++;
+                loadQuestion();
             }, 1200);
         } else {
             document.getElementById("geo-feedback").style.color = "red";
-            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${item.hauptstadt}`;
+            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${currentQuestionData.answer}`;
         }
     }
-
-    loadGeoQuestion();
 </script>
 
 </body>

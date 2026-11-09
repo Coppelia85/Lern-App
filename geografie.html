@@ -9,13 +9,11 @@
         .container { background: white; width: 100%; max-width: 750px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         h1 { color: #d69e2e; margin-top: 5px; font-size: 1.4rem; }
         
-        /* Setup-Bildschirm */
         .setup-box { background: #ebf8ff; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
         .setup-group { margin-bottom: 12px; }
         label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #2b6cb0; }
         select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; }
 
-        /* Karten-Container */
         .map-wrapper {
             position: relative;
             width: 100%;
@@ -28,10 +26,9 @@
         }
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
-        /* ECHTE PIN-MARKER MIT SPITZE */
         .map-pin {
             position: absolute;
-            transform: translate(-50%, -100%); /* Hängt mit der Spitze genau auf dem Koordinatenpunkt */
+            transform: translate(-50%, -100%);
             background: #e53e3e;
             color: white;
             font-weight: bold;
@@ -49,21 +46,13 @@
             transition: all 0.2s ease;
             z-index: 5;
         }
-        /* Die Nummer im Pin wieder gerade drehen */
-        .map-pin span {
-            transform: rotate(45deg);
-        }
+        .map-pin span { transform: rotate(45deg); }
         .map-pin.highlight {
             background: #3182ce;
             width: 28px;
             height: 36px;
             z-index: 15;
             font-size: 0.75rem;
-        }
-        .map-pin:hover {
-            transform: rotate(-45deg) translate(-30%, -30%) scale(1.4);
-            z-index: 20;
-            background: #2b6cb0;
         }
 
         .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
@@ -85,7 +74,6 @@
     <div style="text-align: left;"><a href="index.html">⬅ Zurück zum Menü</a></div>
     <h1>🌍 Europa-Geografie Prüfungstrainer</h1>
 
-    <!-- SETUP-BILDSCHIRM -->
     <div id="setup-screen" class="setup-box">
         <h3>Prüfungsvorbereitung konfigurieren:</h3>
         
@@ -94,17 +82,16 @@
             <select id="difficulty-level">
                 <option value="adaptive">⚡ Adaptiv (Startet Stufe 1, steigt bei Erfolg auf!)</option>
                 <option value="1">Stufe 1: Multiple Choice</option>
-                <option value="2" selected>Stufe 2: Mit Nummernhilfe (Tippen / Karte)</option>
-                <option value="3">Stufe 3: Experten-Modus (Ohne Nummernhilfe)</option>
+                <option value="2" selected>Stufe 2: Mit Nummernhilfe</option>
+                <option value="3">Stufe 3: Experten-Modus (Ohne Hilfen)</option>
             </select>
         </div>
 
         <div class="setup-group">
             <label>Themen / Fragetyp:</label>
             <select id="train-topic">
-                <option value="mixed">Gemischt (Länder, Hauptstädte, Regionen)</option>
                 <option value="capital">Nur Hauptstädte abfragen</option>
-                <option value="region">Nur Regionen zuordnen</option>
+                <option value="mixed">Gemischt (Länder, Hauptstädte, Regionen)</option>
             </select>
         </div>
 
@@ -113,15 +100,13 @@
             <select id="question-limit">
                 <option value="5">5 Fragen</option>
                 <option value="10" selected>10 Fragen</option>
-                <option value="20">20 Fragen</option>
-                <option value="all">Alle verfügbaren Fragen (<span id="total-db-count">0</span>)</option>
+                <option value="all">Alle verfügbaren Fragen</option>
             </select>
         </div>
 
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
     </div>
 
-    <!-- SPIELBEREICH -->
     <div class="stats-bar" id="stats-bar" style="display: none;">
         <span>Frage <span id="current-q-num">1</span> von <span id="total-q-num">0</span></span>
         <span>Stufe: <span id="current-level-display">1</span></span>
@@ -149,12 +134,6 @@
     let selectedLevelSetting = "adaptive";
     let currentActiveLevel = 2;
 
-    function init() {
-        if (typeof europaDatenbank !== 'undefined') {
-            document.getElementById("total-db-count").textContent = europaDatenbank.length * 2;
-        }
-    }
-
     function startTraining() {
         selectedLevelSetting = document.getElementById("difficulty-level").value;
         currentActiveLevel = (selectedLevelSetting === "adaptive") ? 1 : parseInt(selectedLevelSetting);
@@ -166,10 +145,9 @@
         europaDatenbank.forEach(item => {
             if (topic === "mixed" || topic === "capital") {
                 generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt });
-                generatedPool.push({ type: "country", item: item, answer: item.land });
-            }
-            if (topic === "mixed" || topic === "region") {
-                generatedPool.push({ type: "region", item: item, answer: item.region });
+                if (topic === "mixed") {
+                    generatedPool.push({ type: "country", item: item, answer: item.land });
+                }
             }
         });
 
@@ -177,10 +155,7 @@
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
 
-        if (activeQuestions.length === 0) {
-            alert("Keine Fragen gefunden!");
-            return;
-        }
+        if (activeQuestions.length === 0) return;
 
         document.getElementById("setup-screen").style.display = "none";
         document.getElementById("stats-bar").style.display = "flex";
@@ -212,34 +187,27 @@
         let activePinNr = null;
 
         if (currentActiveLevel === 3) {
-            if (qData.type === "capital") promptText = `Wie heißt die Hauptstadt von ${qData.item.land}?`;
+            // Stufe 3: Ohne Hilfen
+            if (qData.type === "capital") promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
             if (qData.type === "country") promptText = `Welches Land hat die Hauptstadt ${qData.item.hauptstadt}?`;
-            if (qData.type === "region") promptText = `Zu welcher Region gehört ${qData.item.land}?`;
             activePinNr = null;
         } else if (currentActiveLevel === 2) {
-            if (qData.type === "capital") promptText = `Schau auf Karte Nr. ${qData.item.nr}: Welche Hauptstadt gesucht?`;
-            if (qData.type === "country") promptText = `Welches Land verbirgt sich hinter Nr. ${qData.item.nr}?`;
-            if (qData.type === "region") promptText = `Zu welcher Region gehört Land Nr. ${qData.item.nr}?`;
+            // Stufe 2: Mit Nummernhilfe
+            if (qData.type === "capital") promptText = `Nenne die Hauptstadt von Punkt ${qData.item.nr} (${qData.item.land}).`;
+            if (qData.type === "country") promptText = `Welches Land verbirgt sich hinter Punkt ${qData.item.nr}?`;
             activePinNr = qData.item.nr;
         } else {
-            promptText = `(Nr. ${qData.item.nr}) Was passt zu ${qData.item.land}?`;
+            // Stufe 1: Multiple Choice
+            if (qData.type === "capital") promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
+            if (qData.type === "country") promptText = `Welches Land gehört zu Hauptstadt ${qData.item.hauptstadt}?`;
             activePinNr = qData.item.nr;
         }
 
         document.getElementById("geo-question").textContent = promptText;
-
-        // NUR BEI LÄNDERN / REGIONEN DEN TIPP ZEIGEN, BEI HAUPTSTÄDTEN KEINE GEBIRGS-HINWEISE
-        if (qData.type !== "capital" && qData.item.tipp) {
-            document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${qData.item.tipp}`;
-            document.getElementById("geo-tip").style.display = "block";
-        } else {
-            document.getElementById("geo-tip").style.display = "none";
-        }
-
+        document.getElementById("geo-tip").style.display = "none";
         document.getElementById("geo-feedback").textContent = "";
 
-        // ALLE 45 LÄNDER ALS PINS ANZEIGEN
-        renderAllMapPins(activePinNr);
+        renderAllMapPins(currentActiveLevel === 3 ? null : activePinNr);
 
         if (currentActiveLevel === 1) {
             document.getElementById("mc-container").style.display = "grid";
@@ -259,7 +227,6 @@
         const container = document.getElementById("pins-container");
         container.innerHTML = "";
 
-        // Alle 45 Länder aus der europaDatenbank durchgehen und Pins mit Spitze setzen
         europaDatenbank.forEach(item => {
             if (item.x && item.y) {
                 let pin = document.createElement("div");
@@ -285,7 +252,7 @@
         let options = [qData.answer];
         while (options.length < 4) {
             let randomItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-            let val = qData.type === "capital" ? randomItem.hauptstadt : (qData.type === "country" ? randomItem.land : randomItem.region);
+            let val = qData.type === "capital" ? randomItem.hauptstadt : randomItem.land;
             if (!options.includes(val)) options.push(val);
         }
         options.sort(() => Math.random() - 0.5);
@@ -299,12 +266,19 @@
         });
     }
 
+    // Hilfsfunktion zur Bereinigung von Umlaute-Problemen beim Textabgleich
+    function normalizeStr(str) {
+        return str.toLowerCase()
+            .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+            .replace(/é/g, 'e').replace(/í/g, 'i').replace(/á/g, 'a')
+            .trim();
+    }
+
     function checkAnswer(selectedOpt = null) {
         let qData = activeQuestions[currentIndex];
-        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value.trim().toLowerCase();
-        let correctAnswer = qData.answer.toLowerCase();
-
-        let isCorrect = (userAnswer === correctAnswer || correctAnswer.includes(userAnswer));
+        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
+        
+        let isCorrect = (normalizeStr(userAnswer) === normalizeStr(qData.answer));
 
         if (isCorrect) {
             document.getElementById("geo-feedback").style.color = "green";
@@ -331,8 +305,6 @@
             }
         }
     }
-
-    init();
 </script>
 
 </body>

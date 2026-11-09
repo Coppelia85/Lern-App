@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Europa-Geografie-Trainer</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        h1 { color: #d69e2e; }
+        .question-box { background: #fefcbf; padding: 20px; border-radius: 10px; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #744210; }
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 15px; font-size: 1rem; }
+        button { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        button:hover { background: #b7791f; }
+        .tip-box { background: #edf2f7; padding: 10px; border-radius: 6px; font-size: 0.9rem; color: #4a5568; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container" style="text-align: left;">
+    <a href="index.html">⬅ Zurück zum Menü</a>
+    <div style="text-align: center;">
+        <h1>🌍 Europa-Geografie</h1>
+        <div class="question-box" id="geo-question">Frage lädt...</div>
+        <div id="geo-tip" class="tip-box"></div>
+        <input type="text" id="geo-answer" placeholder="Antwort eingeben...">
+        <button onclick="checkGeoAnswer()">Antwort prüfen</button>
+        <p id="geo-feedback" style="font-weight: bold; margin-top: 15px; text-align: center;"></p>
+    </div>
+</div>
+
+<script src="daten.js"></script>
+<script>
+    let geoIndex = 0;
+
+    function loadGeoQuestion() {
+        if (geoIndex >= europaDatenbank.length) {
+            document.getElementById("geo-question").textContent = "🎉 Alle Geografie-Fragen erfolgreich gemeistert!";
+            document.getElementById("geo-answer").style.display = "none";
+            return;
+        }
+        let item = europaDatenbank[geoIndex];
+        document.getElementById("geo-question").textContent = `Welche Hauptstadt gehört zum Land Nr. ${item.nr} (${item.region})?`;
+        document.getElementById("geo-tip").textContent = `💡 Tipp: ${item.tipp}`;
+        document.getElementById("geo-tip").style.display = "block";
+        document.getElementById("geo-answer").value = "";
+        document.getElementById("geo-feedback").textContent = "";
+    }
+
+    function checkGeoAnswer() {
+        let item = europaDatenbank[geoIndex];
+        let userAnswer = document.getElementById("geo-answer").value.trim().toLowerCase();
+        let correctAnswer = item.hauptstadt.toLowerCase();
+
+        if (userAnswer === correctAnswer || correctAnswer.includes(userAnswer)) {
+            document.getElementById("geo-feedback").style.color = "green";
+            document.getElementById("geo-feedback").textContent = "Richtig! Stark gemacht! 🌟";
+
+            let user = localStorage.getItem("activeUser") || "Gast";
+            let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
+            localStorage.setItem(`stats_geo_${user}`, count);
+
+            setTimeout(() => {
+                geoIndex++;
+                loadGeoQuestion();
+            }, 1200);
+        } else {
+            document.getElementById("geo-feedback").style.color = "red";
+            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${item.hauptstadt}`;
+        }
+    }
+
+    loadGeoQuestion();
+</script>
+
+</body>
+</html>

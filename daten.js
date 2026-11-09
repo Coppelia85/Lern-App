@@ -3,8 +3,8 @@
 // ==========================================
 
 const userConfig = {
-    "Cecilia": { passwort: "None", rolle: "Kind" },
-    "Cedric":  { passwort: "None", rolle: "Kind" },
+    "King Knulwes": { passwort: "None", rolle: "Kind" },
+    "Queen Katherine":  { passwort: "None", rolle: "Kind" },
     "Test":    { passwort: "None", rolle: "Test" }
 };
 

@@ -6,7 +6,7 @@
     <title>Europa-Geografie Prüfungstrainer</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .container { background: white; width: 100%; max-width: 700px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        .container { background: white; width: 100%; max-width: 750px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         h1 { color: #d69e2e; margin-top: 5px; font-size: 1.4rem; }
         
         /* Setup-Bildschirm */
@@ -28,35 +28,47 @@
         }
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
+        /* ECHTE PIN-MARKER MIT SPITZE */
         .map-pin {
             position: absolute;
-            transform: translate(-50%, -50%);
-            background: #cbd5e0;
-            color: #2d3748;
+            transform: translate(-50%, -100%); /* Hängt mit der Spitze genau auf dem Koordinatenpunkt */
+            background: #e53e3e;
+            color: white;
             font-weight: bold;
-            font-size: 0.7rem;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+            font-size: 0.65rem;
+            width: 22px;
+            height: 28px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg) translate(-30%, -30%);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
-            transition: all 0.2s;
+            border: 1px solid white;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+        /* Die Nummer im Pin wieder gerade drehen */
+        .map-pin span {
+            transform: rotate(45deg);
         }
         .map-pin.highlight {
-            background: #e53e3e;
-            color: white;
-            transform: translate(-50%, -50%) scale(1.2);
-            z-index: 10;
+            background: #3182ce;
+            width: 28px;
+            height: 36px;
+            z-index: 15;
+            font-size: 0.75rem;
+        }
+        .map-pin:hover {
+            transform: rotate(-45deg) translate(-30%, -30%) scale(1.4);
+            z-index: 20;
+            background: #2b6cb0;
         }
 
         .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
         .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; }
         
-        /* Eingabe- und Antwortbereiche */
         input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; display: none; }
         .mc-grid { display: grid; gap: 10px; margin-bottom: 15px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500; text-align: left; }
@@ -81,8 +93,8 @@
             <label>Schwierigkeitsstufe:</label>
             <select id="difficulty-level">
                 <option value="adaptive">⚡ Adaptiv (Startet Stufe 1, steigt bei Erfolg auf!)</option>
-                <option value="1">Stufe 1: Multiple Choice (Mit Auswahlmöglichkeiten)</option>
-                <option value="2">Stufe 2: Mit Nummernhilfe (Tippen / Karte)</option>
+                <option value="1">Stufe 1: Multiple Choice</option>
+                <option value="2" selected>Stufe 2: Mit Nummernhilfe (Tippen / Karte)</option>
                 <option value="3">Stufe 3: Experten-Modus (Ohne Nummernhilfe)</option>
             </select>
         </div>
@@ -101,6 +113,7 @@
             <select id="question-limit">
                 <option value="5">5 Fragen</option>
                 <option value="10" selected>10 Fragen</option>
+                <option value="20">20 Fragen</option>
                 <option value="all">Alle verfügbaren Fragen (<span id="total-db-count">0</span>)</option>
             </select>
         </div>
@@ -122,13 +135,10 @@
     <div class="question-box" id="geo-question"></div>
     <div id="geo-tip" class="tip-box"></div>
 
-    <!-- Eingabe für Stufe 2 & 3 -->
     <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
     <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
 
-    <!-- Multiple Choice für Stufe 1 -->
     <div class="mc-grid" id="mc-container"></div>
-
     <p id="geo-feedback" style="font-weight: bold; margin-top: 12px;"></p>
 </div>
 
@@ -137,15 +147,7 @@
     let activeQuestions = [];
     let currentIndex = 0;
     let selectedLevelSetting = "adaptive";
-    let currentActiveLevel = 1;
-
-    // Korrigierte Prozent-Koordinaten für deine Stepmap-Karte
-    const koordinatenMap = {
-        1: { x: 34, y: 52 }, // Frankreich
-        2: { x: 26, y: 58 }, // Spanien
-        3: { x: 44, y: 64 }, // Italien
-        4: { x: 45, y: 48 }  // Deutschland
-    };
+    let currentActiveLevel = 2;
 
     function init() {
         if (typeof europaDatenbank !== 'undefined') {
@@ -206,36 +208,39 @@
         document.getElementById("total-q-num").textContent = activeQuestions.length;
         document.getElementById("current-level-display").textContent = currentActiveLevel;
 
-        // Fragestellung exakt nach Schwierigkeitsgrad definieren
         let promptText = "";
         let activePinNr = null;
 
         if (currentActiveLevel === 3) {
-            // Stufe 3: Ohne Nummernhilfe / Expertenmodus
             if (qData.type === "capital") promptText = `Wie heißt die Hauptstadt von ${qData.item.land}?`;
             if (qData.type === "country") promptText = `Welches Land hat die Hauptstadt ${qData.item.hauptstadt}?`;
             if (qData.type === "region") promptText = `Zu welcher Region gehört ${qData.item.land}?`;
-            activePinNr = null; // Keine Markierung auf der Karte
+            activePinNr = null;
         } else if (currentActiveLevel === 2) {
-            // Stufe 2: Mit Nummernhilfe
             if (qData.type === "capital") promptText = `Schau auf Karte Nr. ${qData.item.nr}: Welche Hauptstadt gesucht?`;
             if (qData.type === "country") promptText = `Welches Land verbirgt sich hinter Nr. ${qData.item.nr}?`;
             if (qData.type === "region") promptText = `Zu welcher Region gehört Land Nr. ${qData.item.nr}?`;
             activePinNr = qData.item.nr;
         } else {
-            // Stufe 1: Multiple Choice mit Nummernhilfe
             promptText = `(Nr. ${qData.item.nr}) Was passt zu ${qData.item.land}?`;
             activePinNr = qData.item.nr;
         }
 
         document.getElementById("geo-question").textContent = promptText;
-        document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${qData.item.tipp}`;
-        document.getElementById("geo-tip").style.display = "block";
+
+        // NUR BEI LÄNDERN / REGIONEN DEN TIPP ZEIGEN, BEI HAUPTSTÄDTEN KEINE GEBIRGS-HINWEISE
+        if (qData.type !== "capital" && qData.item.tipp) {
+            document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${qData.item.tipp}`;
+            document.getElementById("geo-tip").style.display = "block";
+        } else {
+            document.getElementById("geo-tip").style.display = "none";
+        }
+
         document.getElementById("geo-feedback").textContent = "";
 
-        renderMapPins(activePinNr);
+        // ALLE 45 LÄNDER ALS PINS ANZEIGEN
+        renderAllMapPins(activePinNr);
 
-        // UI umschalten je nach Stufe (Input vs Multiple Choice)
         if (currentActiveLevel === 1) {
             document.getElementById("mc-container").style.display = "grid";
             document.getElementById("geo-answer").style.display = "none";
@@ -250,21 +255,27 @@
         }
     }
 
-    function renderMapPins(activeNr) {
+    function renderAllMapPins(activeNr) {
         const container = document.getElementById("pins-container");
         container.innerHTML = "";
 
-        for (let nr in koordinatenMap) {
-            let pos = koordinatenMap[nr];
-            let pin = document.createElement("div");
-            let isTarget = (parseInt(nr) === activeNr);
-            
-            pin.className = `map-pin ${isTarget ? 'highlight' : ''}`;
-            pin.style.left = `${pos.x}%`;
-            pin.style.top = `${pos.y}%`;
-            pin.textContent = nr;
-            container.appendChild(pin);
-        }
+        // Alle 45 Länder aus der europaDatenbank durchgehen und Pins mit Spitze setzen
+        europaDatenbank.forEach(item => {
+            if (item.x && item.y) {
+                let pin = document.createElement("div");
+                let isTarget = (item.nr === activeNr);
+                
+                pin.className = `map-pin ${isTarget ? 'highlight' : ''}`;
+                pin.style.left = `${item.x}%`;
+                pin.style.top = `${item.y}%`;
+                
+                let span = document.createElement("span");
+                span.textContent = item.nr;
+                pin.appendChild(span);
+
+                container.appendChild(pin);
+            }
+        });
     }
 
     function renderMultipleChoice(qData) {
@@ -303,7 +314,6 @@
             let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
             localStorage.setItem(`stats_geo_${user}`, count);
 
-            // ADAPTIVE SCHWIERIGKEIT: Bei Erfolg im Adaptiv-Modus eine Stufe höher steigen (max Stufe 3)
             if (selectedLevelSetting === "adaptive" && currentActiveLevel < 3) {
                 currentActiveLevel++;
             }
@@ -316,7 +326,6 @@
             document.getElementById("geo-feedback").style.color = "red";
             document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer}`;
             
-            // Bei Fehler im Adaptiv-Modus ggf. auf Stufe 1 zurückfallen zur Frustvermeidung
             if (selectedLevelSetting === "adaptive") {
                 currentActiveLevel = Math.max(1, currentActiveLevel - 1);
             }

@@ -2,10 +2,11 @@
 // ZENTRALE DATENBANK & KONFIGURATION
 // ==========================================
 
+// BENUTZER & PASSWÖRTER (Hier angepasst auf die neuen Namen!)
 const userConfig = {
     "King Knulwes": { passwort: "None", rolle: "Kind" },
-    "Queen Katherine":  { passwort: "None", rolle: "Kind" },
-    "Test":    { passwort: "None", rolle: "Test" }
+    "Queen Katherine": { passwort: "None", rolle: "Kind" },
+    "Test": { passwort: "None", rolle: "Test" }
 };
 
 // VOKABELN (Wie besprochen)
@@ -60,5 +61,5 @@ const europaDatenbank = [
     { nr: 42, land: "Liechtenstein", hauptstadt: "Vaduz", region: "Mitteleuropa", tipp: "Zwischen Schweiz und Österreich im Rheintal.", x: 43, y: 61 },
     { nr: 43, land: "San Marino", hauptstadt: "San Marino", region: "Südeuropa", tipp: "Eingeschlossen im nördlichen Italien.", x: 47, y: 67 },
     { nr: 44, land: "Vatikanstadt", hauptstadt: "Vatikanstadt", region: "Südeuropa", tipp: "Mitten in Rom (Italien).", x: 45, y: 69 },
-    { nr: 45, land: "Andorra", hauptstadt: "Andorra la Vella", "region": "Südeuropa", tipp: "In den Pyrenäen zwischen Frankreich und Spanien.", x: 30, y: 65 }
+    { nr: 45, land: "Andorra", hauptstadt: "Andorra la Vella", region: "Südeuropa", tipp: "In den Pyrenäen zwischen Frankreich und Spanien.", x: 30, y: 65 }
 ];

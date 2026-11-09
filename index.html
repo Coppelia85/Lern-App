@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Europa-Lernstudio Klasse 6</title>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --primary-hover: #2c5282;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --success: #38a169;
+            --error: #e53e3e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            background: #ebf8ff;
+            padding: 15px;
+            border-radius: 8px;
+            color: #2b6cb0;
+        }
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        button.option-btn {
+            background-color: #ffffff;
+            border: 2px solid #cbd5e0;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-weight: 500;
+            width: 100%;
+        }
+        button.option-btn:hover {
+            border-color: var(--primary);
+            background-color: #f7fafc;
+        }
+        button.option-btn.correct {
+            background-color: #c6f6d5;
+            border-color: var(--success);
+            color: #22543d;
+        }
+        button.option-btn.wrong {
+            background-color: #fed7d7;
+            border-color: var(--error);
+            color: #742a2a;
+        }
+        .feedback {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            min-height: 24px;
+        }
+        #next-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+        }
+        #next-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .result-screen {
+            text-align: center;
+        }
+        .esel-box {
+            background: #fffaf0;
+            border-left: 4px solid #dd6b20;
+            padding: 10px 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            border-radius: 0 8px 8px 0;
+            color: #7b341e;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🇪🇺 Europa-Lernstudio</h1>
+    <div class="stats">
+        <span id="progress-indicator">Frage 1 von X</span>
+        <span id="score-indicator">Punkte: 0</span>
+    </div>
+
+    <div id="quiz-container">
+        <div class="question-box" id="question-text">Lade Frage...</div>
+        <div class="options-grid" id="options-container"></div>
+        <div class="feedback" id="feedback-text"></div>
+        <div class="esel-box" id="esel-box"></div>
+        <button id="next-btn" onclick="nextQuestion()">Nächste Frage</button>
+    </div>
+
+    <div id="result-container" class="result-screen" style="display: none;">
+        <h2>🎉 Training beendet!</h2>
+        <p id="final-score-text" style="font-size: 1.2rem; margin: 20px 0;"></p>
+        <button id="next-btn" style="display: block;" onclick="restartQuiz()">Nochmal üben</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // DATEN-BEREICH: Hier kannst du die Fragen flexibel anpassen!
+    // ==========================================
+    const quizData = [
+        {
+            question: "In welches Gewässer mündet der Rhein? (Reim-Eselsbrücke!)",
+            options: ["Schwarzes Meer", "Nordsee", "Kaspisches Meer", "Mittelmeer"],
+            correct: 1, // Index der richtigen Antwort (0-basiert)
+            esel: "Eselsbrücke: „Der Rhein fließt rein in die Nordsee.“"
+        },
+        {
+            question: "Welcher Fluss fließt durch vier Hauptstädte (Wien, Bratislava, Budapest, Belgrad) und mündet ins Schwarze Meer?",
+            options: ["Wolga", "Elbe", "Donau", "Seine"],
+            correct: 2,
+            esel: "Eselsbrücke: Alle D-Flüsse (Donau, Dnjepr, Don) fließen ins Dunkle (= Schwarzes Meer)."
+        },
+        {
+            question: "Welches Gebirge bildet die natürliche Grenze zwischen Frankreich und Spanien?",
+            options: ["Alpen", "Pyrenäen", "Karpaten", "Ural"],
+            correct: 1,
+            esel: "Eselsbrücke: „Die Pyrenäen sind wie Mauern, hinter denen die Spanier lauern.“"
+        },
+        {
+            question: "Wie heißt das flächenmäßig längste Gebirge, das als Grenze zu Asien dient?",
+            options: ["Skandinavisches Gebirge", "Apennin", "Ural", "Karpaten"],
+            correct: 2,
+            esel: "Eselsbrücke: „Der Ural trennt als langes Band Europa vom Asiatenland.“"
+        },
+        {
+            question: "Welches Gebirge hat diese extrem markante Kurven- bzw. Hufeisenform im Osten Europas?",
+            options: ["Karpaten", "Alpen", "Pyrenäen", "Apennin"],
+            correct: 0,
+            esel: "Eselsbrücke: „Die Karpaten machen die Biege.“"
+        },
+        {
+            question: "Welche Halbinsel wird oft mit einem Stiefel verglichen, der im Mittelmeer 'pennt'?",
+            options: ["Iberische Halbinsel", "Balkanhalbinsel", "Skandinavische Halbinsel", "Apenninhalbinsel"],
+            correct: 3,
+            esel: "Eselsbrücke: Im Wort Apennin steckt das „Pennen“ – der Stiefel pennt im Mittelmeer."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const feedbackText = document.getElementById("feedback-text");
+    const nextBtn = document.getElementById("next-btn");
+    const progressIndicator = document.getElementById("progress-indicator");
+    const scoreIndicator = document.getElementById("score-indicator");
+    const quizContainer = document.getElementById("quiz-container");
+    const resultContainer = document.getElementById("result-container");
+    const finalScoreText = document.getElementById("final-score-text");
+    const eselBox = document.getElementById("esel-box");
+
+    function loadQuestion() {
+        answered = false;
+        feedbackText.textContent = "";
+        eselBox.style.display = "none";
+        eselBox.textContent = "";
+        nextBtn.style.display = "none";
+
+        const currentData = quizData[currentQuestion];
+        progressIndicator.textContent = `Frage ${currentQuestion + 1} von ${quizData.length}`;
+        scoreIndicator.textContent = `Punkte: ${score}`;
+        questionText.textContent = currentData.question;
+
+        optionsContainer.innerHTML = "";
+        currentData.options.forEach((option, index) => {
+            const btn = document.createElement("button");
+            btn.classList.add("option-btn");
+            btn.textContent = option;
+            btn.onclick = () => selectOption(index, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function selectOption(selectedIndex, selectedBtn) {
+        if (answered) return;
+        answered = true;
+
+        const currentData = quizData[currentQuestion];
+        const buttons = optionsContainer.querySelectorAll(".option-btn");
+
+        if (selectedIndex === currentData.correct) {
+            selectedBtn.classList.add("correct");
+            feedbackText.textContent = "Richtig! Super gemacht! 🎉";
+            feedbackText.style.color = "var(--success)";
+            score++;
+            scoreIndicator.textContent = `Punkte: ${score}`;
+        } else {
+            selectedBtn.classList.add("wrong");
+            buttons[currentData.correct].classList.add("correct");
+            feedbackText.textContent = "Leider falsch.";
+            feedbackText.style.color = "var(--error)";
+        }
+
+        // Eselsbrücke anzeigen, falls vorhanden
+        if (currentData.esel) {
+            eselBox.textContent = currentData.esel;
+            eselBox.style.display = "block";
+        }
+
+        nextBtn.style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            quizContainer.style.display = "none";
+            resultContainer.style.display = "block";
+            finalScoreText.textContent = `Du hast ${score} von ${quizData.length} Fragen richtig beantwortet!`;
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestion = 0;
+        score = 0;
+        resultContainer.style.display = "none";
+        quizContainer.style.display = "block";
+        loadQuestion();
+    }
+
+    // Start
+    loadQuestion();
+</script>
+
+</body>
+</html>

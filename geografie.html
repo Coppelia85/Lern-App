@@ -3,26 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Europa-Geografie-Trainer mit Karte</title>
+    <title>Europa-Geografie mit interaktiver Karte</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 700px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         h1 { color: #d69e2e; margin-top: 5px; font-size: 1.4rem; }
         
-        /* Karten-Container für saubere Ansicht auf Tablet & Handy */
-        .map-container {
+        /* Karten-Container mit absoluter Positionierung für die Nummer-Pins */
+        .map-wrapper {
+            position: relative;
             width: 100%;
-            max-height: 350px;
-            overflow: hidden;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             margin-bottom: 15px;
+            overflow: hidden;
             background: #cbd5e0;
         }
-        .map-container img {
+        .map-wrapper img {
             width: 100%;
             height: auto;
             display: block;
+        }
+
+        /* Die interaktiven Pins (Nummern auf der Karte) */
+        .map-pin {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background: #e53e3e;
+            color: white;
+            font-weight: bold;
+            font-size: 0.75rem;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: 2px solid white;
+            transition: all 0.2s;
+        }
+        .map-pin:hover, .map-pin.active {
+            background: #3182ce;
+            transform: translate(-50%, -50%) scale(1.2);
+            z-index: 10;
         }
 
         .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; }
@@ -36,17 +61,18 @@
 
 <div class="container">
     <div style="text-align: left;"><a href="index.html">⬅ Zurück zum Menü</a></div>
-    <h1>🌍 Europa-Geografie mit Karte</h1>
+    <h1>🌍 Europa-Geografie mit interaktiver Karte</h1>
 
-    <!-- DIE KARTE: Hier wird das Bild eingebunden -->
-    <div class="map-container">
-        <!-- Ersetze 'europa_karte.png' durch den Dateinamen deines Kartenbildes im Ordner -->
-        <img id="geo-map-img" src="europa_karte.png" alt="Stumme Europakarte mit Nummern" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
+    <!-- Karte mit dynamischen Pins -->
+    <div class="map-wrapper" id="map-wrapper">
+        <img src="europa_karte.png" alt="Stumme Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
+        <!-- Hier werden die Nummern-Pins per JavaScript eingefügt -->
+        <div id="pins-container"></div>
     </div>
 
     <div class="question-box" id="geo-question">Frage lädt...</div>
     <div id="geo-tip" class="tip-box"></div>
-    <input type="text" id="geo-answer" placeholder="Antwort eingeben (z.B. Hauptstadt oder Land)..." onkeypress="if(event.key === 'Y' || event.key === 'Enter') checkGeoAnswer()">
+    <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkGeoAnswer()">
     <button onclick="checkGeoAnswer()">Antwort prüfen</button>
     <p id="geo-feedback" style="font-weight: bold; margin-top: 12px;"></p>
 </div>
@@ -55,20 +81,58 @@
 <script>
     let geoIndex = 0;
 
+    // Ungefähre Prozent-Koordinaten (x, y) auf der Europakarte für die Nummern 1 bis 4
+    // (Diese können wir nach Belieben in daten.js oder hier anpassen, wenn das Bild anders skaliert ist)
+    const koordinatenMap = {
+        1: { x: 30, y: 55 }, // Frankreich (Paris)
+        2: { x: 22, y: 75 }, // Spanien (Madrid)
+        3: { x: 45, y: 68 }, // Italien (Rom)
+        4: { x: 48, y: 45 }  // Deutschland (Berlin)
+    };
+
     function loadGeoQuestion() {
         if (geoIndex >= europaDatenbank.length) {
             document.getElementById("geo-question").textContent = "🎉 Genial! Alle Geografie-Fragen erfolgreich gemeistert!";
             document.getElementById("geo-tip").style.display = "none";
             document.getElementById("geo-answer").style.display = "none";
             document.querySelector("button").style.display = "none";
+            document.getElementById("pins-container").innerHTML = "";
             return;
         }
+
         let item = europaDatenbank[geoIndex];
-        document.getElementById("geo-question").textContent = `Schau auf die Karte: Welche Hauptstadt gehört zu Land Nr. ${item.nr} (${item.region})?`;
+        document.getElementById("geo-question").textContent = `Schau auf die Karte: Welche Hauptstadt gehört zu Land Nr. ${item.nr} (${item.land})?`;
         document.getElementById("geo-tip").innerHTML = `💡 <b>Tipp:</b> ${item.tipp}`;
         document.getElementById("geo-tip").style.display = "block";
         document.getElementById("geo-answer").value = "";
         document.getElementById("geo-feedback").textContent = "";
+
+        renderPins(item.nr);
+    }
+
+    // Zeigt die Pins auf der Karte an (hebt die gesuchte Nummer hervor)
+    function renderPins(activeNr) {
+        const container = document.getElementById("pins-container");
+        container.innerHTML = "";
+
+        // Wir zeigen alle bekannten Pins an, der gesuchte blinkt/leuchtet blau
+        for (let nr in koordinatenMap) {
+            let pos = koordinatenMap[nr];
+            let pin = document.createElement("div");
+            pin.className = `map-pin ${parseInt(nr) === activeNr ? 'active' : ''}`;
+            pin.style.left = `${pos.x}%`;
+            pin.style.top = `${pos.y}%`;
+            pin.textContent = nr;
+            pin.title = `Land / Punkt Nr. ${nr}`;
+            
+            // Klick auf den Pin auf der Karte wählt ihn aus
+            pin.onclick = () => {
+                document.getElementById("geo-answer").value = europaDatenbank[geoIndex].hauptstadt;
+                checkGeoAnswer();
+            };
+
+            container.appendChild(pin);
+        }
     }
 
     function checkGeoAnswer() {

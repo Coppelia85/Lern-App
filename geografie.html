@@ -26,35 +26,6 @@
         }
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
-        .map-pin {
-            position: absolute;
-            transform: translate(-50%, -100%);
-            background: #e53e3e;
-            color: white;
-            font-weight: bold;
-            font-size: 0.65rem;
-            width: 22px;
-            height: 28px;
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg) translate(-30%, -30%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            cursor: pointer;
-            border: 1px solid white;
-            transition: all 0.2s ease;
-            z-index: 5;
-        }
-        .map-pin span { transform: rotate(45deg); }
-        .map-pin.highlight {
-            background: #3182ce;
-            width: 28px;
-            height: 36px;
-            z-index: 15;
-            font-size: 0.75rem;
-        }
-
         .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
         .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; position: relative; }
         
@@ -104,16 +75,16 @@
                 <option value="adaptive">⚡ Adaptiv (Startet Stufe 1, steigt bei Erfolg auf!)</option>
                 <option value="1">Stufe 1: Multiple Choice (Mit Pin-Karte)</option>
                 <option value="2" selected>Stufe 2: Texteingabe mit Pin-Nummer</option>
-                <option value="3">Stufe 3: Experten-Modus (Stumme Karte ohne Pins)</option>
+                <option value="3">Stufe 3: Experten-Modus (Stumme Karte)</option>
             </select>
         </div>
 
         <div class="setup-group">
             <label>Fragetyp:</label>
             <select id="train-topic">
-                <option value="mixed">Gemischt (Länder & Hauptstädte)</option>
-                <option value="capital">Nur Hauptstädte abfragen</option>
-                <option value="country">Nur Länder per Hauptstadt suchen</option>
+                <option value="mixed">Gemischt (Hauptstadt zu Punkt & Land zu Punkt)</option>
+                <option value="capital_by_point">Nur Hauptstadt zu Punkt suchen</option>
+                <option value="country_by_point">Nur Land zu Punkt suchen</option>
             </select>
         </div>
 
@@ -135,8 +106,8 @@
     </div>
 
     <div class="map-wrapper" id="map-wrapper">
+        <!-- Deine eigenen Karten mit festen Laser-Pins oder stumm -->
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
-        <div id="pins-container"></div>
     </div>
 
     <div class="question-box" id="geo-question">
@@ -168,23 +139,35 @@
 
         let generatedPool = [];
         europaDatenbank.forEach(item => {
-            if (topic === "mixed" || topic === "capital") {
-                generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt, prompt: `Nenne die Hauptstadt von ${item.land}.`, tipPool: null, tipIndex: 0 });
+            // Variante A: Hauptstadt von Punkt X suchen (Land wird im Text NICHT genannt, ist aber über die Glühbirne abrufbar!)
+            if (topic === "mixed" || topic === "capital_by_point") {
+                generatedPool.push({ 
+                    type: "capital", 
+                    item: item, 
+                    answer: item.hauptstadt, 
+                    prompt: `Nenne die Hauptstadt von Punkt ${item.nr}.` 
+                });
             }
-            if (topic === "mixed" || topic === "country") {
-                generatedPool.push({ type: "country", item: item, answer: item.land, prompt: `Welches Land hat die Hauptstadt ${item.hauptstadt}?`, tipPool: null, tipIndex: 0 });
+            // Variante B: Land von Punkt X suchen (Hauptstadt/Region als Tipp über Glühbirne)
+            if (topic === "mixed" || topic === "country_by_point") {
+                generatedPool.push({ 
+                    type: "country", 
+                    item: item, 
+                    answer: item.land, 
+                    prompt: `Welches Land liegt bei Punkt ${item.nr}?` 
+                });
             }
         });
 
-        // Neue Runde = Alle Kugeln zurück in den Topf / Komplett neu mischen für diese Runde
+        // Neue Runde = Alle Kugeln zurück in den Topf / neu mischen
         generatedPool.sort(() => Math.random() - 0.5);
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
 
-        // Für jede ausgewählte Frage in dieser neuen Runde initialisieren wir den Tipp-Topf frisch (Ziehen ohne Zurücklegen)
+        // Für jede Frage den Tipp-Topf initialisieren (Ziehen ohne Zurücklegen)
         activeQuestions.forEach(q => {
-            q.tipPool = buildTipPool(q.item);
-            q.tipIndex = 0; // Zeiger auf den ersten Tipp
+            q.tipPool = buildTipPool(q.item, q.type);
+            q.tipIndex = 0;
         });
 
         if (activeQuestions.length === 0) return;
@@ -198,14 +181,20 @@
         loadQuestion();
     }
 
-    function buildTipPool(item) {
+    function buildTipPool(item, qType) {
         let rawTips = [];
+        
+        // Der Name des Landes bzw. die Hauptstadt ist der wichtigste Tipp!
+        if (qType === "capital") {
+            rawTips.push(`Das Land zu Punkt ${item.nr} ist: ${item.land}`);
+        } else {
+            rawTips.push(`Die Hauptstadt von Punkt ${item.nr} ist: ${item.hauptstadt}`);
+        }
+
         if (item.tipp) rawTips.push(item.tipp);
         if (item.region) rawTips.push(`Gehört zur Region: ${item.region}`);
         
-        if (typeof nachlaenderDatenbank !== 'undefined' && item.land === "Deutschland") {
-            rawTips.push("Nachbarländer: " + nachlaenderDatenbank.map(n => n.land).join(", "));
-        }
+        // Gebirge-Verknüpfung
         if (typeof gebirgeDatenbank !== 'undefined') {
             let gebirge = gebirgeDatenbank.filter(g => g.laender && g.laender.includes(item.land));
             if (gebirge.length > 0) rawTips.push("Liegt im Gebirge: " + gebirge.map(g => g.name).join(", "));
@@ -213,7 +202,7 @@
 
         if (rawTips.length === 0) rawTips.push("Kein weiterer Hinweis verfügbar.");
 
-        // Einmalig beim Start der Runde für diese Frage ziehen ohne Zurücklegen vorbereiten (shuffeln)
+        // Einmalig beim Start der Runde für diese Frage mischen (Ziehen ohne Zurücklegen)
         rawTips.sort(() => Math.random() - 0.5);
         return rawTips;
     }
@@ -230,7 +219,7 @@
             
             let container = document.querySelector(".container");
             let endMsg = document.createElement("div");
-            endMsg.innerHTML = "<h2>🎉 Richtig stark! Du hast alle Fragen dieser Prüfungsrunde geschafft!</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄 (Alle Kugeln zurück in den Topf!)</button>";
+            endMsg.innerHTML = "<h2>🎉 Richtig stark! Du hast alle Fragen dieser Prüfungsrunde geschafft!</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄</button>";
             container.appendChild(endMsg);
             return;
         }
@@ -240,28 +229,19 @@
         document.getElementById("total-q-num").textContent = activeQuestions.length;
         document.getElementById("current-level-display").textContent = currentActiveLevel;
 
-        let activePinNr = null;
         let mapImg = document.getElementById("geo-map-img");
-
         if (currentActiveLevel === 3) {
-            mapImg.src = "Regionen_europa.png";
-            activePinNr = null;
+            mapImg.src = "Regionen_europa.png"; // Stumme Karte
         } else {
-            mapImg.src = "regionen_pin_europa.png";
-            activePinNr = qData.item.nr;
+            mapImg.src = "regionen_pin_europa.png"; // Karte mit deinen Laser-Pins
         }
 
-        let displayPrompt = qData.prompt;
-        if (currentActiveLevel === 2) {
-            displayPrompt = `Gesucht ist bei Punkt ${qData.item.nr}: ${qData.prompt}`;
-        }
-        document.getElementById("question-text").textContent = displayPrompt;
+        // Fragetext anzeigen (ohne direkt das Land zu verraten)
+        document.getElementById("question-text").textContent = qData.prompt;
 
         document.getElementById("geo-tip").style.display = "none";
         document.getElementById("geo-tip").textContent = "";
         document.getElementById("geo-feedback").textContent = "";
-
-        renderAllMapPins(currentActiveLevel === 3 ? null : activePinNr);
 
         if (currentActiveLevel === 1) {
             document.getElementById("mc-container").style.display = "grid";
@@ -286,34 +266,12 @@
         tipBox.style.display = "block";
         tipBox.textContent = `💡 Tipp ${qData.tipIndex + 1} von ${qData.tipPool.length}: ${qData.tipPool[qData.tipIndex]}`;
 
-        // Nächsten Tipp aus dem Topf holen (Ziehen ohne Zurücklegen)
+        // Nächsten Tipp ziehen ohne Zurücklegen
         qData.tipIndex++;
-        // Wenn alle Tipps durch sind, wiederholt sich der erste (Index springt auf 0 zurück, Reihenfolge bleibt erhalten)
+        // Wenn alle Tipps durch sind, wiederholt sich der erste
         if (qData.tipIndex >= qData.tipPool.length) {
             qData.tipIndex = 0;
         }
-    }
-
-    function renderAllMapPins(activeNr) {
-        const container = document.getElementById("pins-container");
-        container.innerHTML = "";
-
-        europaDatenbank.forEach(item => {
-            if (item.x && item.y) {
-                let pin = document.createElement("div");
-                let isTarget = (item.nr === activeNr);
-                
-                pin.className = `map-pin ${isTarget ? 'highlight' : ''}`;
-                pin.style.left = `${item.x}%`;
-                pin.style.top = `${item.y}%`;
-                
-                let span = document.createElement("span");
-                span.textContent = item.nr;
-                pin.appendChild(span);
-
-                container.appendChild(pin);
-            }
-        });
     }
 
     function renderMultipleChoice(qData) {

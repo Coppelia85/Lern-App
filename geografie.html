@@ -170,39 +170,110 @@
         }
     });
 
-    function startTraining() {
+        function startTraining() {
         currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
         let topicKey = document.getElementById("train-topic").value;
         let limitVal = document.getElementById("question-limit").value;
 
         let generatedPool = [];
 
-               if (topicKey === "europa_mix") {
+        if (topicKey === "europa_mix") {
             europaDatenbank.forEach(item => {
                 let r = Math.random();
                 let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
                 
                 if (subType === "cap_from_country") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, item: item });
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, item: item, mode: "capital" });
                 } else if (subType === "country_from_cap") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, item: item });
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, item: item, mode: "country" });
                 } else if (subType === "find_number") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), item: item });
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), item: item, mode: "number" });
                 } else {
-                    // Wahr/Falsch-Frage mit automatischer Prüfung (stimmt es zufällig doch?)
                     let randomOther = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
                     let testCap = randomOther.hauptstadt;
                     
                     if (testCap === item.hauptstadt) {
-                        // Falls es zufällig die richtige ist, machen wir eine echte Ja-Frage drauff
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? (Antworte mit Ja oder Nein)`, answer: "ja", item: item });
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}?`, answer: "ja", item: item, mode: "tf" });
                     } else {
-                        // Falsche Hauptstadt -> exakt deine Formulierung!
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? (Falls nein: Antworte mit Nein und nenne die richtige)`, answer: item.hauptstadt, item: item });
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Nenne die richtige Hauptstadt.`, answer: item.hauptstadt, item: item, mode: "capital" });
                     }
                 }
             });
+        } else if (topicKey === "nachlaender") {
+            nachlaenderDatenbank.forEach(n => {
+                generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, item: { land: n.land, tipp: "Grenzt direkt an Deutschland" }, mode: "country" });
+            });
+        } else if (topicKey === "fluesse") {
+            fluesseDatenbank.forEach(f => {
+                generatedPool.push({ cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, item: { land: f.name, tipp: f.info }, mode: "river" });
+            });
+        } else if (topicKey === "gebirge") {
+            gebirgeDatenbank.forEach(g => {
+                generatedPool.push({ cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, item: { land: g.name, tipp: "Länder: " + g.laender.join(", ") }, mode: "mountain" });
+            });
+        } else if (topicKey === "meere") {
+            meereDatenbank.forEach(m => {
+                generatedPool.push({ cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, item: { land: m.name, tipp: "Gewässer in Europa" }, mode: "sea" });
+            });
+        } else if (topicKey === "verdichtung") {
+            verdichtungsraeumeDatenbank.forEach(v => {
+                generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Ballungsraum gehört zu Städten wie ${v.städte[0]}?`, answer: v.name, item: { land: v.name, tipp: "Wirtschafts- und Ballungsraum in " + v.land }, mode: "area" });
+            });
         }
+
+        generatedPool.sort(() => Math.random() - 0.5);
+        let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
+        activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
+
+        activeQuestions.forEach(q => {
+            q.tipPool = [q.item.tipp || "Kein weiterer Tipp verfügbar", `Anfangsbuchstabe: ${q.answer.charAt(0)}`];
+            q.tipIndex = 0;
+            q.retryCount = 0;
+        });
+
+        if (activeQuestions.length === 0) return;
+
+        document.getElementById("setup-screen").style.display = "none";
+        document.getElementById("stats-bar").style.display = "flex";
+        document.getElementById("map-wrapper").style.display = "block";
+        document.getElementById("geo-question").style.display = "block";
+
+        currentIndex = 0;
+        awaitingNext = false;
+        loadQuestion();
+    }
+
+    function renderMultipleChoice(qData) {
+        const mcContainer = document.getElementById("mc-container");
+        mcContainer.innerHTML = "";
+
+        let options = [qData.answer];
+        while (options.length < 4) {
+            let rndItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
+            let val = "";
+            
+            if (qData.mode === "number") {
+                val = rndItem.nr.toString();
+            } else if (qData.mode === "country") {
+                val = rndItem.land;
+            } else if (qData.mode === "tf") {
+                val = Math.random() > 0.5 ? "ja" : "nein";
+            } else {
+                val = rndItem.hauptstadt;
+            }
+
+            if (!options.includes(val)) options.push(val);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            let btn = document.createElement("button");
+            btn.className = "mc-btn";
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt);
+            mcContainer.appendChild(btn);
+        });
+    }
 
         } else if (topicKey === "nachlaender") {
             nachlaenderDatenbank.forEach(n => {

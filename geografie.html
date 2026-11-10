@@ -26,26 +26,6 @@
         }
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
-        .map-skull-btn {
-            position: absolute;
-            left: 72%;
-            top: 32%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid #e53e3e;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            z-index: 20;
-        }
-        .map-skull-btn:hover { transform: translate(-50%, -50%) scale(1.2); background: #fff5f5; }
-
         .stats-bar { font-size: 0.9rem; color: #4a5568; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; }
         .question-box { background: #fefcbf; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 12px; color: #744210; display: none; }
         
@@ -135,7 +115,6 @@
 
     <div class="map-wrapper" id="map-wrapper">
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
-        <button class="map-skull-btn" id="russland-skull" onclick="endSessionEarly()" title="Geheimes Moskau-Easter-Egg!">☠️</button>
     </div>
 
     <div class="question-box" id="geo-question">
@@ -186,7 +165,6 @@
                 let r = Math.random();
                 let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
                 
-                // Erweiterte Synonym-Erkennung für Chisinau/Kischinau, Moldawien etc.
                 let customSynsHauptstadt = [...(item.synonymeHauptstadt || [])];
                 let customSynsLand = [...(item.synonymeLand || [])];
                 if (item.hauptstadt.toLowerCase().includes("chisinau")) customSynsHauptstadt.push("kischinau", "kinsinau");
@@ -281,10 +259,6 @@
         awaitingNext = false;
         document.getElementById("next-btn").style.display = "none";
         document.getElementById("check-btn").style.display = "block";
-
-        let skullBtn = document.getElementById("russland-skull");
-        let isMoscowSkull = Math.random() * 100 <= 4.2;
-        skullBtn.style.display = isMoscowSkull ? "flex" : "none";
 
         if (currentIndex >= activeQuestions.length) {
             showEndScreen("🎉 Richtig stark! Du hast diese Prüfungsrunde abgeschlossen!");
@@ -386,7 +360,6 @@
             .trim();
     }
 
-    // Levenshtein-Distanz Algorithmus für LRS-Unterstützung (Toleranz bei Tippfehlern)
     function levenshtein(a, b) {
         if (a.length === 0) return b.length;
         if (b.length === 0) return a.length;
@@ -412,9 +385,8 @@
         let len = t.length;
         if (len === 0) return false;
         let dist = levenshtein(u, t);
-        let similarity = (len - dist) / len; // Dezimalwert der Übereinstimmung (z.B. 0.6 = 60%)
+        let similarity = (len - dist) / len;
         
-        // Regel für LRS: 3-4 Buchstaben = 30% Toleranz (0.3), längere Wörter = 50% Toleranz (0.5)
         let threshold = (len <= 4) ? 0.30 : 0.50;
         return similarity >= threshold;
     }
@@ -437,11 +409,9 @@
         if (!sessionStats[qData.cat]) sessionStats[qData.cat] = { total: 0, correct: 0 };
         sessionStats[qData.cat].total++;
 
-        // Prüfen ob Hauptantwort oder Synonyme (inkl. LRS-Ähnlichkeitsprüfung)
         let allValidAnswers = [qData.answer, ...(qData.synonyms || [])];
         let isCorrect = allValidAnswers.some(ans => isSimilarEnough(userAnswer, ans));
 
-        // Echte Mehrfach-Lösung (z.B. Gebirge in Ländern)
         if (!isCorrect && qData.targetCountry && typeof gebirgeDatenbank !== 'undefined') {
             let matchingGebirge = gebirgeDatenbank.filter(g => g.laender.includes(qData.targetCountry));
             isCorrect = matchingGebirge.some(m => isSimilarEnough(userAnswer, m.name));

@@ -5,75 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Europa-Geografie Prüfungstrainer</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .container { background: white; width: 100%; max-width: 750px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
-        h1 { color: #d69e2e; margin-top: 5px; font-size: 1.4rem; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .container { background: white; width: 100%; max-width: 750px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
+        h1 { color: #d69e2e; margin-top: 5px; font-size: 1.3rem; }
         
-        .setup-box { background: #ebf8ff; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
-        .setup-group { margin-bottom: 12px; }
-        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #2b6cb0; }
-        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; }
+        .setup-box { background: #ebf8ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
+        .setup-group { margin-bottom: 10px; }
+        label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; color: #2b6cb0; }
+        select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; }
 
         .map-wrapper {
             position: relative;
             width: 100%;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             overflow: hidden;
             background: #cbd5e0;
             display: none;
         }
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
-        .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
-        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; position: relative; padding-right: 60px; }
-        
-        /* Glühbirnen-Button für Tipps */
-        .bulb-btn {
+        /* Easter Egg: Notaus-Totenkopf versteckt im riesigen Russland (ca. bei X: 72%, Y: 32%) */
+        .map-skull-btn {
             position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
-            border: 2px solid #d69e2e;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-        }
-        .bulb-btn:hover { background: #fffaf0; transform: translateY(-50%) scale(1.05); }
-
-        /* Totenkopf-Notaus-Button */
-        .skull-btn {
-            position: absolute;
-            right: 60px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
+            left: 72%;
+            top: 32%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
             border: 2px solid #e53e3e;
             border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+            z-index: 20;
+        }
+        .map-skull-btn:hover { transform: translate(-50%, -50%) scale(1.2); background: #fff5f5; }
+
+        .stats-bar { font-size: 0.9rem; color: #4a5568; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; }
+        
+        /* Fragetext ohne verdeckende Buttons */
+        .question-box { background: #fefcbf; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 12px; color: #744210; display: none; }
+        
+        /* Eingabebereich im Hochformat nebeneinander: Input links, Glühbirne rechts */
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+            display: none;
+        }
+        input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; box-sizing: border-box; }
+        
+        /* Glühbirnen-Button rechts neben dem Eingabefeld in 1 Zeile */
+        .bulb-btn {
+            background: white;
+            border: 2px solid #d69e2e;
+            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
             transition: all 0.2s;
         }
-        .skull-btn:hover { background: #fff5f5; transform: translateY(-50%) scale(1.05); }
+        .bulb-btn:hover { background: #fffaf0; transform: scale(1.05); }
 
-        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; display: none; }
-        .mc-grid { display: grid; gap: 10px; margin-bottom: 15px; display: none; }
-        .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500; text-align: left; }
+        .mc-grid { display: grid; gap: 8px; margin-bottom: 12px; display: none; }
+        .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 10px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 500; text-align: left; }
         .mc-btn:hover { border-color: #d69e2e; background: #fffaf0; }
 
         .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
@@ -81,7 +90,7 @@
         .next-btn { background: #3182ce; display: none; }
         .next-btn:hover { background: #2b6cb0; }
 
-        .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 12px; border-radius: 8px; font-size: 0.95rem; color: #744210; margin-bottom: 12px; text-align: left; display: none; }
+        .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
     </style>
 </head>
 <body>
@@ -131,24 +140,27 @@
 
     <div class="map-wrapper" id="map-wrapper">
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
+        <!-- Easter Egg: Notaus-Totenkopf in Russland versteckt -->
+        <button class="map-skull-btn" onclick="endSessionEarly()" title="Notaus: Runde vorzeitig beenden (Im weiten Russland versteckt!)">☠️</button>
     </div>
 
     <div class="question-box" id="geo-question">
         <span id="question-text">Fragetext</span>
-        <!-- Notaus-Knopf ☠️ -->
-        <button class="skull-btn" onclick="endSessionEarly()" title="Runde sofort beenden (Notaus)">☠️</button>
-        <!-- Glühbirnen-Button 💡 -->
-        <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
     </div>
+    
     <div id="geo-tip" class="tip-box"></div>
 
-    <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+    <!-- Eingabefeld und Glühbirne in 1 Zeile -->
+    <div class="input-row" id="input-row">
+        <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+        <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
+    </div>
+
     <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
-    
     <button class="action-btn next-btn" id="next-btn" onclick="proceedNext()">Weiter zur nächsten Frage ➡️</button>
 
     <div class="mc-grid" id="mc-container"></div>
-    <p id="geo-feedback" style="font-weight: bold; margin-top: 12px;"></p>
+    <p id="geo-feedback" style="font-weight: bold; margin-top: 10px;"></p>
 </div>
 
 <script src="daten.js"></script>
@@ -244,12 +256,12 @@
 
         if (currentActiveLevel === 1) {
             document.getElementById("mc-container").style.display = "grid";
-            document.getElementById("geo-answer").style.display = "none";
+            document.getElementById("input-row").style.display = "none";
             document.getElementById("check-btn").style.display = "none";
             renderMultipleChoice(qData);
         } else {
             document.getElementById("mc-container").style.display = "none";
-            document.getElementById("geo-answer").style.display = "block";
+            document.getElementById("input-row").style.display = "flex";
             document.getElementById("check-btn").style.display = "block";
             document.getElementById("geo-answer").value = "";
             document.getElementById("geo-answer").focus();
@@ -259,7 +271,7 @@
     function showEndScreen(titleText) {
         document.getElementById("geo-question").style.display = "none";
         document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("geo-answer").style.display = "none";
+        document.getElementById("input-row").style.display = "none";
         document.getElementById("check-btn").style.display = "none";
         document.getElementById("next-btn").style.display = "none";
         document.getElementById("mc-container").style.display = "none";
@@ -272,10 +284,10 @@
         container.appendChild(endMsg);
     }
 
-    // ☠️ Notaus-Funktion: Runde sofort beenden
+    // ☠️ Notaus-Funktion im Russland-Easter-Egg
     function endSessionEarly() {
-        if (confirm("Runde wirklich vorzeitig beenden?")) {
-            showEndScreen("☠️ Runde vorzeitig beendet! Kopf hoch, beim nächsten Mal sitzt es!");
+        if (confirm("Runde wirklich vorzeitig beenden? (Der Totenkopf im fernen Russland wurde gefunden!)")) {
+            showEndScreen("☠️ Runde vorzeitig beendet über das Russland-Easter-Egg!");
         }
     }
 
@@ -356,12 +368,22 @@
         let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
         
         let normUser = normalizeStr(userAnswer);
+
+        // --- EASTER EGG: DIE ANTWORT 42 ---
+        if (normUser === "42") {
+            let feedback = document.getElementById("geo-feedback");
+            feedback.style.color = "#d69e2e";
+            feedback.textContent = "🌌 42 ist die Antwort auf alles.... Aber hier suchen wir etwas anderes...";
+            document.getElementById("geo-answer").value = "";
+            return; // Weder richtig noch falsch, neutraler Zustand!
+        }
+
         let normCorrect = normalizeStr(qData.answer);
 
         let similarity = getSimilarity(normUser, normCorrect);
         let isCorrect = (normUser === normCorrect || similarity >= 0.7);
 
-        document.getElementById("geo-answer").style.display = "none";
+        document.getElementById("input-row").style.display = "none";
         document.getElementById("check-btn").style.display = "none";
         document.getElementById("mc-container").style.display = "none";
 

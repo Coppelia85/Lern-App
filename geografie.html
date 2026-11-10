@@ -64,7 +64,7 @@
         .next-btn { background: #3182ce; display: none; }
         .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
         
-        .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; }
+        .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; display: none; }
     </style>
 </head>
 <body>
@@ -79,21 +79,21 @@
         <div class="setup-group">
             <label>Schwierigkeitsstufe & Modus:</label>
             <select id="difficulty-level">
-                <option value="1">Stufe 1: Multiple Choice (Richtungs-Shuffle aktiv)</option>
-                <option value="2" selected>Stufe 2: Texteingabe (Mit Surprise-Verknüpfungen)</option>
-                <option value="3">Stufe 3: Experten-Modus (Stumme Karte)</option>
+                <option value="1">Stufe 1: Multiple Choice</option>
+                <option value="2" selected>Stufe 2: Texteingabe</option>
+                <option value="3">Stufe 3: Experten-Modus</option>
             </select>
         </div>
 
         <div class="setup-group">
-            <label>Themenbereich (Kategorie wählen):</label>
+            <label>Themenbereich:</label>
             <select id="train-topic">
-                <option value="europa_mix">Städte & Länder (Anti-Zahlen-Mix)</option>
+                <option value="europa_mix">Städte und Länder</option>
                 <option value="nachlaender">Nachbarländer von Deutschland</option>
-                <option value="fluesse">Flüsse in Europa</option>
-                <option value="gebirge">Gebirge in Europa</option>
-                <option value="meere">Meere & Ozeane</option>
-                <option value="verdichtung">Verdichtungsräume & Ballungsgebiete</option>
+                <option value="fluesse">Flüsse</option>
+                <option value="gebirge">Gebirge</option>
+                <option value="meere">Meere</option>
+                <option value="verdichtung">Verdichtungsräume</option>
             </select>
         </div>
 
@@ -108,7 +108,8 @@
 
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
 
-        <div class="admin-box">
+        <!-- Nur für Rolle Chef sichtbarer Bereich -->
+        <div class="admin-box" id="chef-admin-box">
             <b>🔒 Eltern-Statistik (Chef):</b><br>
             <button onclick="exportCSVStats()" style="margin-top:6px; padding:6px 10px; background:#2b6cb0; color:white; border:none; border-radius:4px; cursor:pointer;">Statistik als Excel/CSV exportieren 📊</button>
         </div>
@@ -131,7 +132,7 @@
     <div id="geo-tip" class="tip-box"></div>
 
     <div class="input-row" id="input-row">
-        <input type="text" id="geo-answer" placeholder="Antwort eingeben (Trennzeichen: , / + & und)..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+        <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
         <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
     </div>
 
@@ -144,7 +145,7 @@
 
 <script src="daten.js"></script>
 <script>
-     let activeQuestions = [];
+    let activeQuestions = [];
     let currentIndex = 0;
     let currentActiveLevel = 2;
     let awaitingNext = false;
@@ -158,6 +159,16 @@
         "Verdichtungsräume": { total: 0, correct: 0 }
     };
 
+    // Prüfen, ob eingemeldeter User die Rolle "Chef" hat
+    window.addEventListener("DOMContentLoaded", () => {
+        let activeUser = localStorage.getItem("activeUser");
+        if (activeUser && typeof userConfig !== 'undefined' && userConfig[activeUser]) {
+            if (userConfig[activeUser].rolle === "Chef") {
+                document.getElementById("chef-admin-box").style.display = "block";
+            }
+        }
+    });
+
     function startTraining() {
         currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
         let topicKey = document.getElementById("train-topic").value;
@@ -170,11 +181,6 @@
                 let r = Math.random();
                 let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
                 
-                let surpriseInfo = "";
-                if (currentActiveLevel >= 2 && item.region) {
-                    surpriseInfo = ` (Surprise-Bonus: Region ${item.region})`;
-                }
-
                 if (subType === "cap_from_country") {
                     generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, item: item });
                 } else if (subType === "country_from_cap") {
@@ -421,4 +427,3 @@
 
 </body>
 </html>
-   

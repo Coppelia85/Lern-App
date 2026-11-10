@@ -8,67 +8,32 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 750px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
         h1 { color: #d69e2e; margin-top: 5px; font-size: 1.3rem; }
-        
         .setup-box { background: #ebf8ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
         .setup-group { margin-bottom: 10px; }
         label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; color: #2b6cb0; }
         select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; }
-
-        .map-wrapper {
-            position: relative;
-            width: 100%;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            overflow: hidden;
-            background: #cbd5e0;
-            display: none;
-        }
+        .map-wrapper { position: relative; width: 100%; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 12px; overflow: hidden; background: #cbd5e0; display: none; }
         .map-wrapper img { width: 100%; height: auto; display: block; }
-
         .stats-bar { font-size: 0.85rem; color: #4a5568; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; flex-wrap: wrap; gap: 4px; }
         .question-box { background: #fefcbf; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 12px; color: #744210; display: none; }
-        
         .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; display: none; }
         input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; box-sizing: border-box; }
-        
-        .bulb-btn {
-            background: white; border: 2px solid #d69e2e; border-radius: 8px; width: 48px; height: 48px;
-            font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
-        }
-        .bulb-btn:hover { background: #fffaf0; transform: scale(1.05); }
-
-        .exit-btn {
-            background: white; border: 2px solid #e53e3e; border-radius: 8px; width: 48px; height: 48px;
-            font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
-        }
-        .exit-btn:hover { background: #fff5f5; transform: scale(1.05); }
-
+        .bulb-btn, .exit-btn { background: white; border-radius: 8px; width: 48px; height: 48px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .bulb-btn { border: 2px solid #d69e2e; } .exit-btn { border: 2px solid #e53e3e; }
         .mc-grid { display: grid; gap: 8px; margin-bottom: 12px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 10px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 500; text-align: left; }
-        .mc-btn:hover { border-color: #d69e2e; background: #fffaf0; }
-
         .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
-        .action-btn:hover { background: #b7791f; }
         .next-btn { background: #3182ce; display: none; }
-        .next-btn:hover { background: #2b6cb0; }
-
         .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
-        
         .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; display: block; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div style="text-align: left;"><a href="index.html">⬅ Zurück zum Menü</a></div>
     <h1>🌍 Europa-Geografie Prüfungstrainer</h1>
-
     <div id="setup-screen" class="setup-box">
         <h3>Prüfungsvorbereitung konfigurieren:</h3>
-        
         <div class="setup-group">
             <label>Schwierigkeitsstufe & Modus:</label>
             <select id="difficulty-level">
@@ -77,7 +42,6 @@
                 <option value="3">Stufe 3: Experten-Modus (2 XP)</option>
             </select>
         </div>
-
         <div class="setup-group">
             <label>Themenbereich:</label>
             <select id="train-topic">
@@ -90,7 +54,6 @@
                 <option value="verdichtung">Verdichtungsräume & Ballungsgebiete</option>
             </select>
         </div>
-
         <div class="setup-group">
             <label>Anzahl der Fragen:</label>
             <select id="question-limit">
@@ -99,70 +62,39 @@
                 <option value="all">Alle verfügbaren Fragen</option>
             </select>
         </div>
-
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
-
         <div class="admin-box" id="chef-admin-box">
             <b>🔒 Eltern-Statistik (Chef):</b><br>
             <button onclick="exportCSVStats()" style="margin-top:6px; padding:6px 10px; background:#2b6cb0; color:white; border:none; border-radius:4px; cursor:pointer;">Statistik als Excel/CSV exportieren 📊</button>
         </div>
     </div>
-
     <div class="stats-bar" id="stats-bar" style="display: none;">
         <span>Frage <span id="current-q-num">1</span>/<span id="total-q-num">0</span></span>
         <span>⚡ XP: <span id="user-xp">0</span></span>
         <span>🏆 Trophäen: <span id="user-trophies-count">0</span></span>
     </div>
-
     <div class="map-wrapper" id="map-wrapper">
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
     </div>
-
-    <div class="question-box" id="geo-question">
-        <span id="question-text">Fragetext</span>
-    </div>
-    
+    <div class="question-box" id="geo-question"><span id="question-text">Fragetext</span></div>
     <div id="geo-tip" class="tip-box"></div>
-
     <div class="input-row" id="input-row">
         <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
         <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
         <button class="exit-btn" onclick="endSessionEarly()" title="Runde vorzeitig beenden">☠️</button>
     </div>
-
     <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
     <button class="action-btn next-btn" id="next-btn" onclick="proceedNext()">Weiter zur nächsten Frage ➡️</button>
-
     <div class="mc-grid" id="mc-container"></div>
     <p id="geo-feedback" style="font-weight: bold; margin-top: 10px;"></p>
 </div>
-
 <script src="daten.js"></script>
 <script>
-    let activeQuestions = [];
-    let currentIndex = 0;
-    let currentActiveLevel = 2;
-    let awaitingNext = false;
-    let roundErrorsCount = 0; // Zählt Fehler in der aktuellen Runde für die 5 Bonus-XP
-
+    let activeQuestions = [], currentIndex = 0, currentActiveLevel = 2, awaitingNext = false, roundErrorsCount = 0;
     let userXP = parseInt(localStorage.getItem("geo_user_xp") || "0");
     let unlockedTrophies = JSON.parse(localStorage.getItem("geo_user_trophies") || "[]");
-
-    let sessionStats = {
-        "Städte & Länder": { total: 0, correct: 0 },
-        "Nachbarländer": { total: 0, correct: 0 },
-        "Flüsse": { total: 0, correct: 0 },
-        "Gebirge": { total: 0, correct: 0 },
-        "Meere": { total: 0, correct: 0 },
-        "Inseln & Halbinseln": { total: 0, correct: 0 },
-        "Verdichtungsräume": { total: 0, correct: 0 }
-    };
-
-    function updateXPDisplay() {
-        document.getElementById("user-xp").textContent = userXP;
-        document.getElementById("user-trophies-count").textContent = unlockedTrophies.length;
-    }
-
+    let sessionStats = { "Städte & Länder": {total:0,correct:0}, "Nachbarländer": {total:0,correct:0}, "Flüsse": {total:0,correct:0}, "Gebirge": {total:0,correct:0}, "Meere": {total:0,correct:0}, "Inseln & Halbinseln": {total:0,correct:0}, "Verdichtungsräume": {total:0,correct:0} };
+    function updateXPDisplay() { document.getElementById("user-xp").textContent = userXP; document.getElementById("user-trophies-count").textContent = unlockedTrophies.length; }
     function checkTrophies(earnedCorrectTotal) {
         let newTrophies = [];
         let possibleTrophies = [
@@ -171,222 +103,119 @@
             { id: 'expert', name: '🥇 Europa-Experte (10 richtige Antworten)', condition: earnedCorrectTotal >= 10 },
             { id: 'master', name: '🏆 Karten-König (20 richtige Antworten)', condition: earnedCorrectTotal >= 20 }
         ];
-
-        possibleTrophies.forEach(t => {
-            if (t.condition && !unlockedTrophies.includes(t.id)) {
-                unlockedTrophies.push(t.id);
-                newTrophies.push(t.name);
-            }
-        });
-
-        if (newTrophies.length > 0) {
-            localStorage.setItem("geo_user_trophies", JSON.stringify(unlockedTrophies));
-            updateXPDisplay();
-            setTimeout(() => {
-                alert(`🎉 Trophäe freigeschaltet!\n\n• ${newTrophies.join("\n• ")}`);
-            }, 500);
-        }
+        possibleTrophies.forEach(t => { if (t.condition && !unlockedTrophies.includes(t.id)) { unlockedTrophies.push(t.id); newTrophies.push(t.name); } });
+        if (newTrophies.length > 0) { localStorage.setItem("geo_user_trophies", JSON.stringify(unlockedTrophies)); updateXPDisplay(); setTimeout(() => alert(`🎉 Trophäe freigeschaltet!\n\n• ${newTrophies.join("\n• ")}`), 500); }
     }
-
     function startTraining() {
         currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
-        let topicKey = document.getElementById("train-topic").value;
-        let limitVal = document.getElementById("question-limit").value;
-        roundErrorsCount = 0; // Reset Fehlerzähler für die neue Runde
-
-        let generatedPool = [];
-
+        let topicKey = document.getElementById("train-topic").value, limitVal = document.getElementById("question-limit").value;
+        roundErrorsCount = 0; let generatedPool = [];
         if (topicKey === "europa_mix") {
             europaDatenbank.forEach(item => {
-                let r = Math.random();
-                let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
-                
-                let customSynsHauptstadt = [...(item.synonymeHauptstadt || [])];
-                let customSynsLand = [...(item.synonymeLand || [])];
+                let r = Math.random(), subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
+                let customSynsHauptstadt = [...(item.synonymeHauptstadt || [])], customSynsLand = [...(item.synonymeLand || [])];
                 if (item.hauptstadt.toLowerCase().includes("chisinau")) customSynsHauptstadt.push("kischinau", "kinsinau");
                 if (item.land.toLowerCase().includes("moldau")) customSynsLand.push("moldawien", "republik moldau");
-
-                if (subType === "cap_from_country") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, synonyms: customSynsHauptstadt, item: item, mode: "capital", useCleanMap: false });
-                } else if (subType === "country_from_cap") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, synonyms: customSynsLand, item: item, mode: "country", useCleanMap: false });
-                } else if (subType === "find_number") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), synonyms: [], item: item, mode: "number", useCleanMap: false });
-                } else {
-                    let randomOther = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-                    let testCap = randomOther.hauptstadt;
-                    
-                    if (testCap === item.hauptstadt) {
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}?`, answer: "ja", synonyms: ["stimmt", "richtig"], item: item, mode: "tf", useCleanMap: false });
-                    } else {
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Antworte mit Nein und nenne die richtige.`, answer: item.hauptstadt, synonyms: customSynsHauptstadt, item: item, mode: "capital", useCleanMap: false });
-                    }
+                if (subType === "cap_from_country") generatedPool.push({cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, synonyms: customSynsHauptstadt, item, mode: "capital", useCleanMap: false});
+                else if (subType === "country_from_cap") generatedPool.push({cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, synonyms: customSynsLand, item, mode: "country", useCleanMap: false});
+                else if (subType === "find_number") generatedPool.push({cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), synonyms: [], item, mode: "number", useCleanMap: false});
+                else {
+                    let randomOther = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)], testCap = randomOther.hauptstadt;
+                    if (testCap === item.hauptstadt) generatedPool.push({cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}?`, answer: "ja", synonyms: ["stimmt", "richtig"], item, mode: "tf", useCleanMap: false});
+                    else generatedPool.push({cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Antworte mit Nein und nenne die richtige.`, answer: item.hauptstadt, synonyms: customSynsHauptstadt, item, mode: "capital", useCleanMap: false});
                 }
             });
         } else if (topicKey === "nachlaender") {
-            let allNachlaenderNames = nachlaenderDatenbank.map(n => n.land);
-            let allNachlaenderSyns = [];
+            let allNames = nachlaenderDatenbank.map(n => n.land), allSyns = [];
+            nachlaenderDatenbank.forEach(n => { if (n.synonyme) allSyns.push(...n.synonyme); });
             nachlaenderDatenbank.forEach(n => {
-                if (n.synonyme) allNachlaenderSyns.push(...n.synonyme);
-            });
-
-            nachlaenderDatenbank.forEach(n => {
-                let combinedSynonyms = Array.from(new Set([...allNachlaenderNames, ...allNachlaenderSyns, ...(n.synonyme || [])]));
-                generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, synonyms: combinedSynonyms, item: { land: n.land, tipp: "Grenzt direkt an Deutschland" }, mode: "country", useCleanMap: false, isNachbarModus: true });
+                let combinedSynonyms = Array.from(new Set([...allNames, ...allSyns, ...(n.synonyme || [])]));
+                generatedPool.push({cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, synonyms: combinedSynonyms, item: {land: n.land, tipp: "Grenzt direkt an Deutschland"}, mode: "country", useCleanMap: false, isNachbarModus: true});
             });
         } else if (topicKey === "fluesse") {
             fluesseDatenbank.forEach(f => {
-                let syns = [...(f.synonyme || [])];
-                if (f.name.toLowerCase().includes("donau")) syns.push("donau");
-                generatedPool.push({ cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, synonyms: syns, item: { land: f.name, tipp: f.info }, mode: "river", useCleanMap: true });
+                let syns = [...(f.synonyme || [])]; if (f.name.toLowerCase().includes("donau")) syns.push("donau");
+                generatedPool.push({cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, synonyms: syns, item: {land: f.name, tipp: f.info}, mode: "river", useCleanMap: true});
             });
         } else if (topicKey === "gebirge") {
             gebirgeDatenbank.forEach(g => {
-                generatedPool.push({ cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, synonyms: g.synonyme || [], item: { land: g.name, tipp: "Länder: " + g.laender.join(", ") }, mode: "mountain", useCleanMap: true, targetCountry: g.laender[0] });
+                generatedPool.push({cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, synonyms: g.synonyme || [], item: {land: g.name, tipp: "Länder: " + g.laender.join(", ")}, mode: "mountain", useCleanMap: true, targetCountry: g.laender[0]});
             });
         } else if (topicKey === "meere") {
             meereDatenbank.forEach(m => {
-                let syns = [...(m.synonyme || [])];
-                if (m.name.toLowerCase().includes("atlantischer ozean")) syns.push("atlantik");
-                if (m.name.toLowerCase().includes("mittelmeer")) syns.push("mittelmeer");
-                generatedPool.push({ cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, synonyms: syns, item: { land: m.name, tipp: "Gewässer in Europa" }, mode: "sea", useCleanMap: true });
+                let syns = [...(m.synonyme || [])]; if (m.name.toLowerCase().includes("atlantischer ozean")) syns.push("atlantik"); if (m.name.toLowerCase().includes("mittelmeer")) syns.push("mittelmeer");
+                generatedPool.push({cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, synonyms: syns, item: {land: m.name, tipp: "Gewässer in Europa"}, mode: "sea", useCleanMap: true});
             });
-        } else if (topicKey === "inseln") {
-            if (typeof inselnDatenbank !== 'undefined') {
-                inselnDatenbank.forEach(i => {
-                    generatedPool.push({ cat: "Inseln & Halbinseln", prompt: `Welche Insel / Halbinsel ist hier bzw. gehört zu ${i.bezug || 'Europa'}?`, answer: i.name, synonyms: i.synonyme || [], item: { land: i.name, tipp: i.tipp || "Insel oder Halbinsel in Europa" }, mode: "island", useCleanMap: true });
-                });
-            }
+        } else if (topicKey === "inseln" && typeof inselnDatenbank !== 'undefined') {
+            inselnDatenbank.forEach(i => {
+                generatedPool.push({cat: "Inseln & Halbinseln", prompt: `Welche Insel / Halbinsel ist hier bzw. gehört zu ${i.bezug || 'Europa'}?`, answer: i.name, synonyms: i.synonyme || [], item: {land: i.name, tipp: i.tipp || "Insel oder Halbinsel in Europa"}, mode: "island", useCleanMap: true});
+            });
         } else if (topicKey === "verdichtung") {
             let baseVerdichtung = (typeof verdichtungsraeumeDatenbank !== 'undefined') ? verdichtungsraeumeDatenbank : [
-                { name: "Rhein-Ruhr", städte: ["Köln", "Düsseldorf", "Essen"], land: "Deutschland" },
-                { name: "Rhein-Main", städte: ["Frankfurt", "Wiesbaden", "Mainz"], land: "Deutschland" },
-                { name: "Berlin", städte: ["Berlin"], land: "Deutschland" },
-                { name: "Hamburg", städte: ["Hamburg"], land: "Deutschland" },
-                { name: "Stuttgart", städte: ["Stuttgart"], land: "Deutschland" },
-                { name: "München", städte: ["München"], land: "Deutschland" },
-                { name: "London", städte: ["London"], land: "Großbritannien" },
-                { name: "Paris", städte: ["Paris"], land: "Frankreich" },
-                { name: "Mailand", städte: ["Mailand"], land: "Italien" },
-                { name: "Randstad", städte: ["Amsterdam", "Rotterdam", "Den Haag"], land: "Niederlande" }
+                {name: "Rhein-Ruhr", städte: ["Köln", "Düsseldorf", "Essen"], land: "Deutschland"}, {name: "Rhein-Main", städte: ["Frankfurt", "Wiesbaden", "Mainz"], land: "Deutschland"},
+                {name: "Berlin", städte: ["Berlin"], land: "Deutschland"}, {name: "Hamburg", städte: ["Hamburg"], land: "Deutschland"}, {name: "Stuttgart", städte: ["Stuttgart"], land: "Deutschland"},
+                {name: "München", städte: ["München"], land: "Deutschland"}, {name: "London", städte: ["London"], land: "Großbritannien"}, {name: "Paris", städte: ["Paris"], land: "Frankreich"},
+                {name: "Mailand", städte: ["Mailand"], land: "Italien"}, {name: "Randstad", städte: ["Amsterdam", "Rotterdam", "Den Haag"], land: "Niederlande"}
             ];
-            
             baseVerdichtung.forEach(v => {
-                generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Verdichtungsraum / Ballungsraum hat wichtige Städte wie ${v.städte[0]}?`, answer: v.name, synonyms: v.synonyme || [], item: { land: v.name, tipp: "Wirtschaftsraum mit Großstädten" }, mode: "area", useCleanMap: true });
+                generatedPool.push({cat: "Verdichtungsräume", prompt: `Welcher Verdichtungsraum / Ballungsraum hat wichtige Städte wie ${v.städte[0]}?`, answer: v.name, synonyms: v.synonyme || [], item: {land: v.name, tipp: "Wirtschaftsraum mit Großstädten"}, mode: "area", useCleanMap: true});
             });
         }
-
         generatedPool.sort(() => Math.random() - 0.5);
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
-
-        activeQuestions.forEach(q => {
-            q.tipPool = [q.item.tipp || "Kein weiterer Tipp verfügbar", `Anfangsbuchstabe: ${q.answer.charAt(0)}`];
-            q.tipIndex = 0;
-            q.retryCount = 0;
-        });
-
+        activeQuestions.forEach(q => { q.tipPool = [q.item.tipp || "Kein weiterer Tipp", `Anfangsbuchstabe: ${q.answer.charAt(0)}`]; q.tipIndex = 0; q.retryCount = 0; });
         if (activeQuestions.length === 0) return;
-
         updateXPDisplay();
         document.getElementById("setup-screen").style.display = "none";
         document.getElementById("stats-bar").style.display = "flex";
         document.getElementById("map-wrapper").style.display = "block";
         document.getElementById("geo-question").style.display = "block";
-
-        currentIndex = 0;
-        awaitingNext = false;
-        loadQuestion();
+        currentIndex = 0; awaitingNext = false; loadQuestion();
     }
-
     function loadQuestion() {
-        awaitingNext = false;
-        document.getElementById("next-btn").style.display = "none";
-        document.getElementById("check-btn").style.display = "block";
-
+        awaitingNext = false; document.getElementById("next-btn").style.display = "none"; document.getElementById("check-btn").style.display = "block";
         if (currentIndex >= activeQuestions.length) {
             let bonusText = "";
-            if (roundErrorsCount === 0) {
-                userXP += 5;
-                localStorage.setItem("geo_user_xp", userXP);
-                bonusText = "<br>🔥 <b>Perfekte Runde! +5 Bonus-XP!</b>";
-            }
+            if (roundErrorsCount === 0) { userXP += 5; localStorage.setItem("geo_user_xp", userXP); bonusText = "<br>🔥 <b>Perfekte Runde! +5 Bonus-XP!</b>"; }
             updateXPDisplay();
-            showEndScreen(`🎉 Richtig stark! Runde abgeschlossen!{bonusText}<br><br>⚡ XP-Gesamt: ${userXP} XP<br>🏆 Trophäen: ${unlockedTrophies.length}`);
-            
-            // Master-Statistik für Master-Aufzeichnung eintragen
+            showEndScreen(`🎉 Richtig stark! Runde abgeschlossen!${bonusText}<br><br>⚡ XP-Gesamt: ${userXP} XP<br>🏆 Trophäen: ${unlockedTrophies.length}`);
             let masterData = JSON.parse(localStorage.getItem("master_learning_stats") || "{}");
             masterData.geografie = (masterData.geografie || 0) + userXP;
             localStorage.setItem("master_learning_stats", JSON.stringify(masterData));
             return;
         }
-
         let qData = activeQuestions[currentIndex];
         document.getElementById("current-q-num").textContent = currentIndex + 1;
         document.getElementById("total-q-num").textContent = activeQuestions.length;
         document.getElementById("current-cat-display").textContent = qData.cat;
-
         let mapImg = document.getElementById("geo-map-img");
-        if (qData.useCleanMap || currentActiveLevel === 3) {
-            mapImg.src = "europa_karte.png";
-        } else {
-            mapImg.src = "regionen_pin_europa.png";
-        }
-
+        mapImg.src = (qData.useCleanMap || currentActiveLevel === 3) ? "europa_karte.png" : "regionen_pin_europa.png";
         document.getElementById("question-text").textContent = qData.prompt;
-        document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("geo-tip").textContent = "";
-        document.getElementById("geo-feedback").textContent = "";
-
+        document.getElementById("geo-tip").style.display = "none"; document.getElementById("geo-tip").textContent = ""; document.getElementById("geo-feedback").textContent = "";
         if (currentActiveLevel === 1) {
-            document.getElementById("mc-container").style.display = "grid";
-            document.getElementById("input-row").style.display = "none";
-            document.getElementById("check-btn").style.display = "none";
+            document.getElementById("mc-container").style.display = "grid"; document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none";
             renderMultipleChoice(qData);
         } else {
-            document.getElementById("mc-container").style.display = "none";
-            document.getElementById("input-row").style.display = "flex";
-            document.getElementById("check-btn").style.display = "block";
-            document.getElementById("geo-answer").value = "";
-            document.getElementById("geo-answer").focus();
+            document.getElementById("mc-container").style.display = "none"; document.getElementById("input-row").style.display = "flex"; document.getElementById("check-btn").style.display = "block";
+            document.getElementById("geo-answer").value = ""; document.getElementById("geo-answer").focus();
         }
     }
-
     function showEndScreen(titleText) {
-        document.getElementById("geo-question").style.display = "none";
-        document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("input-row").style.display = "none";
-        document.getElementById("check-btn").style.display = "none";
-        document.getElementById("next-btn").style.display = "none";
-        document.getElementById("mc-container").style.display = "none";
-        document.getElementById("map-wrapper").style.display = "none";
-        document.getElementById("stats-bar").style.display = "none";
-        
-        let container = document.querySelector(".container");
-        let endMsg = document.createElement("div");
+        document.getElementById("geo-question").style.display = "none"; document.getElementById("geo-tip").style.display = "none"; document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none"; document.getElementById("next-btn").style.display = "none"; document.getElementById("mc-container").style.display = "none"; document.getElementById("map-wrapper").style.display = "none"; document.getElementById("stats-bar").style.display = "none";
+        let container = document.querySelector(".container"), endMsg = document.createElement("div");
         endMsg.innerHTML = `<h2>${titleText}</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄</button>`;
         container.appendChild(endMsg);
     }
-
-    function endSessionEarly() {
-        if (confirm("Runde wirklich vorzeitig beenden?")) {
-            showEndScreen("☠️ Runde vorzeitig beendet!");
-        }
-    }
-
+    function endSessionEarly() { if (confirm("Runde wirklich vorzeitig beenden?")) showEndScreen("☠️ Runde vorzeitig beendet!"); }
     function showNextTip() {
-        let qData = activeQuestions[currentIndex];
-        let tipBox = document.getElementById("geo-tip");
+        let qData = activeQuestions[currentIndex], tipBox = document.getElementById("geo-tip");
         if (!qData.tipPool) return;
-        tipBox.style.display = "block";
-        tipBox.textContent = `💡 Tipp: ${qData.tipPool[qData.tipIndex]}`;
+        tipBox.style.display = "block"; tipBox.textContent = `💡 Tipp: ${qData.tipPool[qData.tipIndex]}`;
         qData.tipIndex = (qData.tipIndex + 1) % qData.tipPool.length;
     }
-
     function renderMultipleChoice(qData) {
-        const mcContainer = document.getElementById("mc-container");
-        mcContainer.innerHTML = "";
-
+        const mcContainer = document.getElementById("mc-container"); mcContainer.innerHTML = "";
         let options = [qData.answer];
         while (options.length < 4) {
             let rndItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
@@ -394,113 +223,63 @@
             if (qData.mode === "number") val = rndItem.nr.toString();
             if (qData.mode === "country") val = rndItem.land;
             if (qData.mode === "tf") val = Math.random() > 0.5 ? "ja" : "nein";
-            
             if (!options.includes(val)) options.push(val);
         }
         options.sort(() => Math.random() - 0.5);
-
         options.forEach(opt => {
-            let btn = document.createElement("button");
-            btn.className = "mc-btn";
-            btn.textContent = opt;
-            btn.onclick = () => checkAnswer(opt);
+            let btn = document.createElement("button"); btn.className = "mc-btn"; btn.textContent = opt; btn.onclick = () => checkAnswer(opt);
             mcContainer.appendChild(btn);
         });
     }
-
     function normalizeStr(str) {
-        return str.toLowerCase()
-            .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
-            .replace(/é/g, 'e').replace(/í/g, 'i').replace(/á/g, 'a')
-            .replace(/ß/g, 'ss')
-            .trim();
+        return str.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/é/g, 'e').replace(/í/g, 'i').replace(/á/g, 'a').replace(/ß/g, 'ss').trim();
     }
-
     function levenshtein(a, b) {
-        if (a.length === 0) return b.length;
-        if (b.length === 0) return a.length;
-        let matrix = [];
-        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+        if (a.length === 0) return b.length; if (b.length === 0) return a.length;
+        let matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i]; for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
         for (let i = 1; i <= b.length; i++) {
             for (let j = 1; j <= a.length; j++) {
-                if (b.charAt(i-1) === a.charAt(j-1)) {
-                    matrix[i][j] = matrix[i-1][j-1];
-                } else {
-                    matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1));
-                }
+                matrix[i][j] = b.charAt(i-1) === a.charAt(j-1) ? matrix[i-1][j-1] : Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1));
             }
         }
         return matrix[b.length][a.length];
     }
-
     function isSimilarEnough(userStr, targetStr) {
-        let u = normalizeStr(userStr);
-        let t = normalizeStr(targetStr);
-        if (u === t) return true;
-        let len = t.length;
-        if (len === 0) return false;
-        let dist = levenshtein(u, t);
-        let similarity = (len - dist) / len;
-        
-        let threshold = (len <= 4) ? 0.30 : 0.50;
-        return similarity >= threshold;
+        let u = normalizeStr(userStr), t = normalizeStr(targetStr);
+        if (u === t) return true; let len = t.length; if (len === 0) return false;
+        let dist = levenshtein(u, t), similarity = (len - dist) / len;
+        return similarity >= (len <= 4 ? 0.30 : 0.50);
     }
-
     function checkAnswer(selectedOpt = null) {
         if (awaitingNext) return;
-        let qData = activeQuestions[currentIndex];
-        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
-        
-        let normUser = normalizeStr(userAnswer);
-
-        if (normUser === "42") {
-            let feedback = document.getElementById("geo-feedback");
-            feedback.style.color = "#d69e2e";
-            feedback.textContent = "🌌 42 ist die Antwort auf alles.... Aber hier suchen wir etwas anderes...";
-            document.getElementById("geo-answer").value = "";
-            return;
+        let qData = activeQuestions[currentIndex], userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
+        if (normalizeStr(userAnswer) === "42") {
+            document.getElementById("geo-feedback").style.color = "#d69e2e";
+            document.getElementById("geo-feedback").textContent = "🌌 42 ist die Antwort auf alles.... Aber hier suchen wir etwas anderes...";
+            document.getElementById("geo-answer").value = ""; return;
         }
-
-        if (!sessionStats[qData.cat]) sessionStats[qData.cat] = { total: 0, correct: 0 };
+        if (!sessionStats[qData.cat]) sessionStats[qData.cat] = {total: 0, correct: 0};
         sessionStats[qData.cat].total++;
-
         let allValidAnswers = [qData.answer, ...(qData.synonyms || [])];
         let isCorrect = allValidAnswers.some(ans => isSimilarEnough(userAnswer, ans));
-
         if (!isCorrect && qData.targetCountry && typeof gebirgeDatenbank !== 'undefined') {
             let matchingGebirge = gebirgeDatenbank.filter(g => g.laender.includes(qData.targetCountry));
             isCorrect = matchingGebirge.some(m => isSimilarEnough(userAnswer, m.name));
         }
-
-        document.getElementById("input-row").style.display = "none";
-        document.getElementById("check-btn").style.display = "none";
-        document.getElementById("mc-container").style.display = "none";
-
+        document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none"; document.getElementById("mc-container").style.display = "none";
         if (isCorrect) {
             sessionStats[qData.cat].correct++;
-            
             let xpGained = (currentActiveLevel === 3) ? 2 : 1;
-            userXP += xpGained;
-            localStorage.setItem("geo_user_xp", userXP);
-
-            let totalCorrectSoFar = Object.values(sessionStats).reduce((sum, c) => sum + c.correct, 0);
-            checkTrophies(totalCorrectSoFar);
+            userXP += xpGained; localStorage.setItem("geo_user_xp", userXP);
+            checkTrophies(Object.values(sessionStats).reduce((sum, c) => sum + c.correct, 0));
             updateXPDisplay();
-
             document.getElementById("geo-feedback").style.color = "green";
             document.getElementById("geo-feedback").textContent = `Richtig! Super gemacht! +${xpGained} XP 🌟`;
-
-            setTimeout(() => {
-                currentIndex++;
-                loadQuestion();
-            }, 1200);
+            setTimeout(() => { currentIndex++; loadQuestion(); }, 1200);
         } else {
-            roundErrorsCount++; // Fehler für Bonus-Berechnung merken
-            awaitingNext = true;
+            roundErrorsCount++; awaitingNext = true;
             if (qData.retryCount === 0) {
-                qData.retryCount++;
-                activeQuestions.push(qData);
+                qData.retryCount++; activeQuestions.push(qData);
                 document.getElementById("total-q-num").textContent = activeQuestions.length;
                 document.getElementById("geo-feedback").style.color = "red";
                 let feedbackText = qData.isNachbarModus ? `(Hinweis: Jedes deutsche Nachbarland ist richtig, gesucht war hier: ${qData.answer})` : `Richtig wäre: ${qData.answer}`;
@@ -512,29 +291,19 @@
             document.getElementById("next-btn").style.display = "block";
         }
     }
-
-    function proceedNext() {
-        currentIndex++;
-        loadQuestion();
-    }
-
+    function proceedNext() { currentIndex++; loadQuestion(); }
     function exportCSVStats() {
-        let csvContent = "data:text/csv;charset=utf-8,Kategorie;Erkannte_Fragen;Gesamt_Fragen;Erkennungsrate\n";
+        let masterData = JSON.parse(localStorage.getItem("master_learning_stats") || "{}");
+        let geoXP = masterData.geografie || parseInt(localStorage.getItem("geo_user_xp") || "0");
+        let vocabXP = masterData.vokabeln || parseInt(localStorage.getItem("vokabel_user_xp") || "0");
+        let csvContent = "data:text/csv;charset=utf-8,Lernbereich;Gesammelte_XP\nNur Geografie;" + geoXP + "\nNur Vokabeln (Sprachen);"+ vocabXP +"\nMASTER GESAMTSUMME;" + (geoXP + vocabXP) + "\n\nKategorie;Erkannte_Fragen;Gesamt_Fragen;Erkennungsrate\n";
         for (let cat in sessionStats) {
-            let s = sessionStats[cat];
-            let rate = s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%";
-            csvContent += `${cat};${s.correct};${s.total};${rate}\n`;
+            let s = sessionStats[cat]; csvContent += `${cat};${s.correct};${s.total};${s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%"}\n`;
         }
-
-        let encodedUri = encodeURI(csvContent);
-        let link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Geografie_Lernstatistik.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        let encodedUri = encodeURI(csvContent), link = document.createElement("a");
+        link.setAttribute("href", encodedUri); link.setAttribute("download", "Geografie_Lernstatistik.csv");
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 </script>
-
 </body>
 </html>

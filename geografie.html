@@ -26,7 +26,6 @@
         }
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
-        /* Easter Egg: Notaus-Totenkopf taucht mit 4.2% Wahrscheinlichkeit in Russland auf */
         .map-skull-btn {
             position: absolute;
             left: 72%;
@@ -39,56 +38,33 @@
             height: 32px;
             font-size: 1rem;
             cursor: pointer;
-            display: none; /* Wird per Zufall (4.2%) eingeblendet */
+            display: none;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            transition: all 0.2s;
             z-index: 20;
         }
-        .map-skull-btn:hover { transform: translate(-50%, -50%) scale(1.2); background: #fff5f5; }
 
         .stats-bar { font-size: 0.9rem; color: #4a5568; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; }
-        
         .question-box { background: #fefcbf; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 12px; color: #744210; display: none; }
         
-        /* Eingabebereich im Hochformat: Input links, Glühbirne rechts in 1 Zeile */
-        .input-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            align-items: center;
-            display: none;
-        }
+        .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; display: none; }
         input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; box-sizing: border-box; }
         
         .bulb-btn {
-            background: white;
-            border: 2px solid #d69e2e;
-            border-radius: 8px;
-            width: 48px;
-            height: 48px;
-            font-size: 1.3rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-            transition: all 0.2s;
+            background: white; border: 2px solid #d69e2e; border-radius: 8px; width: 48px; height: 48px;
+            font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
         }
-        .bulb-btn:hover { background: #fffaf0; transform: scale(1.05); }
 
         .mc-grid { display: grid; gap: 8px; margin-bottom: 12px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 10px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 500; text-align: left; }
-        .mc-btn:hover { border-color: #d69e2e; background: #fffaf0; }
 
         .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
-        .action-btn:hover { background: #b7791f; }
         .next-btn { background: #3182ce; display: none; }
-        .next-btn:hover { background: #2b6cb0; }
-
         .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
+        
+        .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; }
     </style>
 </head>
 <body>
@@ -101,21 +77,23 @@
         <h3>Prüfungsvorbereitung konfigurieren:</h3>
         
         <div class="setup-group">
-            <label>Schwierigkeitsstufe & Karte:</label>
+            <label>Schwierigkeitsstufe & Modus:</label>
             <select id="difficulty-level">
-                <option value="adaptive">⚡ Adaptiv (Startet Stufe 1, steigt bei Erfolg auf!)</option>
-                <option value="1">Stufe 1: Multiple Choice (Mit Pin-Karte)</option>
-                <option value="2" selected>Stufe 2: Texteingabe mit Pin-Nummer</option>
+                <option value="1">Stufe 1: Multiple Choice (Richtungs-Shuffle aktiv)</option>
+                <option value="2" selected>Stufe 2: Texteingabe (Mit Surprise-Verknüpfungen)</option>
                 <option value="3">Stufe 3: Experten-Modus (Stumme Karte)</option>
             </select>
         </div>
 
         <div class="setup-group">
-            <label>Fragetyp:</label>
+            <label>Themenbereich (Kategorie wählen):</label>
             <select id="train-topic">
-                <option value="mixed">Gemischt (Hauptstadt zu Punkt & Land zu Punkt)</option>
-                <option value="capital_by_point">Nur Hauptstadt zu Punkt suchen</option>
-                <option value="country_by_point">Nur Land zu Punkt suchen</option>
+                <option value="europa_mix">Städte & Länder (Anti-Zahlen-Mix)</option>
+                <option value="nachlaender">Nachbarländer von Deutschland</option>
+                <option value="fluesse">Flüsse in Europa</option>
+                <option value="gebirge">Gebirge in Europa</option>
+                <option value="meere">Meere & Ozeane</option>
+                <option value="verdichtung">Verdichtungsräume & Ballungsgebiete</option>
             </select>
         </div>
 
@@ -129,17 +107,21 @@
         </div>
 
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
+
+        <div class="admin-box">
+            <b>🔒 Eltern-Statistik (Chef):</b><br>
+            <button onclick="exportCSVStats()" style="margin-top:6px; padding:6px 10px; background:#2b6cb0; color:white; border:none; border-radius:4px; cursor:pointer;">Statistik als Excel/CSV exportieren 📊</button>
+        </div>
     </div>
 
     <div class="stats-bar" id="stats-bar" style="display: none;">
         <span>Frage <span id="current-q-num">1</span> von <span id="total-q-num">0</span></span>
-        <span>Stufe: <span id="current-level-display">1</span></span>
+        <span>Kategorie: <span id="current-cat-display">Land/Stadt</span></span>
     </div>
 
     <div class="map-wrapper" id="map-wrapper">
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
-        <!-- Easter Egg: Notaus-Totenkopf in Russland mit 4.2% Chance -->
-        <button class="map-skull-btn" id="russland-skull" onclick="endSessionEarly()" title="Notaus: Das geheime Russland-Easter-Egg!">☠️</button>
+        <button class="map-skull-btn" id="russland-skull" onclick="endSessionEarly()" title="Notaus">☠️</button>
     </div>
 
     <div class="question-box" id="geo-question">
@@ -149,7 +131,7 @@
     <div id="geo-tip" class="tip-box"></div>
 
     <div class="input-row" id="input-row">
-        <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+        <input type="text" id="geo-answer" placeholder="Antwort eingeben (Trennzeichen: , / + & und)..." onkeypress="if(event.key === 'Enter') checkAnswer()">
         <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
     </div>
 
@@ -164,33 +146,78 @@
 <script>
     let activeQuestions = [];
     let currentIndex = 0;
-    let selectedLevelSetting = "adaptive";
     let currentActiveLevel = 2;
     let awaitingNext = false;
 
+    let sessionStats = {
+        "Städte & Länder": { total: 0, correct: 0 },
+        "Nachbarländer": { total: 0, correct: 0 },
+        "Flüsse": { total: 0, correct: 0 },
+        "Gebirge": { total: 0, correct: 0 },
+        "Meere": { total: 0, correct: 0 },
+        "Verdichtungsräume": { total: 0, correct: 0 }
+    };
+
     function startTraining() {
-        selectedLevelSetting = document.getElementById("difficulty-level").value;
-        currentActiveLevel = (selectedLevelSetting === "adaptive") ? 1 : parseInt(selectedLevelSetting);
-        
-        let topic = document.getElementById("train-topic").value;
+        currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
+        let topicKey = document.getElementById("train-topic").value;
         let limitVal = document.getElementById("question-limit").value;
 
         let generatedPool = [];
-        europaDatenbank.forEach(item => {
-            if (topic === "mixed" || topic === "capital_by_point") {
-                generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt, prompt: `Nenne die Hauptstadt von Punkt ${item.nr}.`, retryCount: 0 });
-            }
-            if (topic === "mixed" || topic === "country_by_point") {
-                generatedPool.push({ type: "country", item: item, answer: item.land, prompt: `Welches Land liegt bei Punkt ${item.nr}?`, retryCount: 0 });
-            }
-        });
+
+        if (topicKey === "europa_mix") {
+            // Anti-Zahlen-Fixierung & Richtungs-Shuffle ab Stufe 1 mit 70/30-Verteilung (gerundet)
+            europaDatenbank.forEach(item => {
+                let r = Math.random();
+                // 65% Chance Hauptrichtung (Land->Stadt oder Stadt->Land), max 70/30 Verteilung
+                let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
+                
+                // Surprise-Modus ab Stufe 2: Heimliche Zusatzverknüpfung im Hintergrund
+                let surpriseInfo = "";
+                if (currentActiveLevel >= 2 && item.region) {
+                    surpriseInfo = ` (Surprise-Bonus: Region ${item.region})`;
+                }
+
+                if (subType === "cap_from_country") {
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, item: item });
+                } else if (subType === "country_from_cap") {
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, item: item });
+                } else if (subType === "find_number") {
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), item: item });
+                } else {
+                    let randomOther = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
+                    let wrongCap = randomOther.hauptstadt;
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${wrongCap} die Hauptstadt von ${item.land}? (Antworte mit Nein und nenne die richtige)`, answer: item.hauptstadt, item: item });
+                }
+            });
+        } else if (topicKey === "nachlaender") {
+            nachlaenderDatenbank.forEach(n => {
+                generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, item: { land: n.land, tipp: "Grenzt direkt an Deutschland" } });
+            });
+        } else if (topicKey === "fluesse") {
+            fluesseDatenbank.forEach(f => {
+                generatedPool.push({ cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, item: { land: f.name, tipp: f.info } });
+            });
+        } else if (topicKey === "gebirge") {
+            gebirgeDatenbank.forEach(g => {
+                generatedPool.push({ cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, item: { land: g.name, tipp: "Länder: " + g.laender.join(", ") } });
+            });
+        } else if (topicKey === "meere") {
+            meereDatenbank.forEach(m => {
+                generatedPool.push({ cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, item: { land: m.name, tipp: "Gewässer in Europa" } });
+            });
+        } else if (topicKey === "verdichtung") {
+            verdichtungsraeumeDatenbank.forEach(v => {
+                generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Ballungsraum gehört zu Städten wie ${v.städte[0]}?`, answer: v.name, item: { land: v.name, tipp: "Wirtschafts- und Ballungsraum in " + v.land } });
+            });
+        }
 
         generatedPool.sort(() => Math.random() - 0.5);
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
 
         activeQuestions.forEach(q => {
-            q.tipPool = buildTipPool(q.item, q.type);
+            q.tipPool = [q.item.tipp || "Kein weiterer Tipp verfügbar", `Anfangsbuchstabe: ${q.answer.charAt(0)}`];
             q.tipIndex = 0;
             q.retryCount = 0;
         });
@@ -207,40 +234,13 @@
         loadQuestion();
     }
 
-    function buildTipPool(item, qType) {
-        let rawTips = [];
-        if (qType === "capital") {
-            rawTips.push(`Das Land zu Punkt ${item.nr} ist: ${item.land}`);
-        } else {
-            rawTips.push(`Die Hauptstadt von Punkt ${item.nr} ist: ${item.hauptstadt}`);
-        }
-
-        if (item.tipp) rawTips.push(item.tipp);
-        if (item.region) rawTips.push(`Gehört zur Region: ${item.region}`);
-        
-        if (typeof gebirgeDatenbank !== 'undefined') {
-            let gebirge = gebirgeDatenbank.filter(g => g.laender && g.laender.includes(item.land));
-            if (gebirge.length > 0) rawTips.push("Liegt im Gebirge: " + gebirge.map(g => g.name).join(", "));
-        }
-
-        if (rawTips.length === 0) rawTips.push("Kein weiterer Hinweis verfügbar.");
-        rawTips.sort(() => Math.random() - 0.5);
-        return rawTips;
-    }
-
     function loadQuestion() {
         awaitingNext = false;
         document.getElementById("next-btn").style.display = "none";
         document.getElementById("check-btn").style.display = "block";
 
-        // --- EASTER EGG: 4.2% Chance für den Notaus-Totenkopf in Russland ---
         let skullBtn = document.getElementById("russland-skull");
-        let chance = Math.random() * 100; // 0 bis 100
-        if (chance <= 4.2) {
-            skullBtn.style.display = "flex"; // Zeige Totenkopf in Russland
-        } else {
-            skullBtn.style.display = "none"; // Versteckt lassen
-        }
+        skullBtn.style.display = (Math.random() * 100 <= 4.2) ? "flex" : "none";
 
         if (currentIndex >= activeQuestions.length) {
             showEndScreen("🎉 Richtig stark! Du hast diese Prüfungsrunde abgeschlossen!");
@@ -250,7 +250,7 @@
         let qData = activeQuestions[currentIndex];
         document.getElementById("current-q-num").textContent = currentIndex + 1;
         document.getElementById("total-q-num").textContent = activeQuestions.length;
-        document.getElementById("current-level-display").textContent = currentActiveLevel;
+        document.getElementById("current-cat-display").textContent = qData.cat;
 
         let mapImg = document.getElementById("geo-map-img");
         mapImg.src = (currentActiveLevel === 3) ? "Regionen_europa.png" : "regionen_pin_europa.png";
@@ -291,7 +291,7 @@
     }
 
     function endSessionEarly() {
-        if (confirm("Runde wirklich vorzeitig beenden? (Der seltene Totenkopf in Russland wurde entdeckt!)")) {
+        if (confirm("Runde wirklich vorzeitig beenden?")) {
             showEndScreen("☠️ Runde vorzeitig beendet über das 4,2%-Russland-Easter-Egg!");
         }
     }
@@ -299,27 +299,21 @@
     function showNextTip() {
         let qData = activeQuestions[currentIndex];
         let tipBox = document.getElementById("geo-tip");
-        if (!qData.tipPool || qData.tipPool.length === 0) return;
-
+        if (!qData.tipPool) return;
         tipBox.style.display = "block";
-        tipBox.textContent = `💡 Tipp ${qData.tipIndex + 1} von ${qData.tipPool.length}: ${qData.tipPool[qData.tipIndex]}`;
-
-        qData.tipIndex++;
-        if (qData.tipIndex >= qData.tipPool.length) qData.tipIndex = 0;
+        tipBox.textContent = `💡 Tipp: ${qData.tipPool[qData.tipIndex]}`;
+        qData.tipIndex = (qData.tipIndex + 1) % qData.tipPool.length;
     }
 
     function renderMultipleChoice(qData) {
         const mcContainer = document.getElementById("mc-container");
         mcContainer.innerHTML = "";
-
         let options = [qData.answer];
         while (options.length < 4) {
-            let randomItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-            let val = qData.type === "capital" ? randomItem.hauptstadt : randomItem.land;
-            if (!options.includes(val)) options.push(val);
+            let rnd = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)].land;
+            if (!options.includes(rnd)) options.push(rnd);
         }
         options.sort(() => Math.random() - 0.5);
-
         options.forEach(opt => {
             let btn = document.createElement("button");
             btn.className = "mc-btn";
@@ -337,36 +331,6 @@
             .trim();
     }
 
-    function getSimilarity(s1, s2) {
-        let longer = s1; let shorter = s2;
-        if (s1.length < s2.length) { longer = s2; shorter = s1; }
-        let longerLength = longer.length;
-        if (longerLength === 0) return 1.0;
-        return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
-    }
-
-    function editDistance(s1, s2) {
-        s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
-        let costs = new Array();
-        for (let i = 0; i <= s1.length; i++) {
-            let lastValue = i;
-            for (let j = 0; j <= s2.length; j++) {
-                if (i === 0) { costs[j] = j; }
-                else {
-                    if (j > 0) {
-                        let newValue = costs[j - 1];
-                        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
-                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                        }
-                        costs[j - 1] = lastValue; lastValue = newValue;
-                    }
-                }
-            }
-            if (i > 0) { costs[s2.length] = lastValue; }
-        }
-        return costs[s2.length];
-    }
-
     function checkAnswer(selectedOpt = null) {
         if (awaitingNext) return;
         let qData = activeQuestions[currentIndex];
@@ -374,7 +338,6 @@
         
         let normUser = normalizeStr(userAnswer);
 
-        // --- EASTER EGG: DIE ANTWORT 42 ---
         if (normUser === "42") {
             let feedback = document.getElementById("geo-feedback");
             feedback.style.color = "#d69e2e";
@@ -383,22 +346,28 @@
             return;
         }
 
-        let normCorrect = normalizeStr(qData.answer);
+        if (!sessionStats[qData.cat]) sessionStats[qData.cat] = { total: 0, correct: 0 };
+        sessionStats[qData.cat].total++;
 
-        let similarity = getSimilarity(normUser, normCorrect);
-        let isCorrect = (normUser === normCorrect || similarity >= 0.7);
+        let normCorrect = normalizeStr(qData.answer);
+        let isCorrect = false;
+
+        let userParts = userAnswer.split(/,|\/|\+|&|\bund\b|\boder\b/i).map(p => normalizeStr(p));
+        if (userParts.some(part => part.length > 0 && normCorrect.includes(part))) {
+            isCorrect = true;
+        }
+        if (normUser === normCorrect) {
+            isCorrect = true;
+        }
 
         document.getElementById("input-row").style.display = "none";
         document.getElementById("check-btn").style.display = "none";
         document.getElementById("mc-container").style.display = "none";
 
         if (isCorrect) {
+            sessionStats[qData.cat].correct++;
             document.getElementById("geo-feedback").style.color = "green";
             document.getElementById("geo-feedback").textContent = "Richtig! Super gemacht! 🌟";
-
-            if (selectedLevelSetting === "adaptive" && currentActiveLevel < 3) {
-                currentActiveLevel++;
-            }
 
             setTimeout(() => {
                 currentIndex++;
@@ -406,7 +375,6 @@
             }, 1200);
         } else {
             awaitingNext = true;
-            
             if (qData.retryCount === 0) {
                 qData.retryCount++;
                 activeQuestions.push(qData);
@@ -417,12 +385,7 @@
                 document.getElementById("geo-feedback").style.color = "red";
                 document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer} (Endgültig beendet für diese Runde).`;
             }
-
             document.getElementById("next-btn").style.display = "block";
-            
-            if (selectedLevelSetting === "adaptive") {
-                currentActiveLevel = Math.max(1, currentActiveLevel - 1);
-            }
         }
     }
 
@@ -430,6 +393,33 @@
         currentIndex++;
         loadQuestion();
     }
+
+    function exportCSVStats() {
+        let pass = prompt("Bitte Eltern-Passwort eingeben (Chef):");
+        if (pass !== "47110815") {
+            alert("Falsches Passwort!");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Kategorie;Erkannte_Fragen;Gesamt_Fragen;Erkennungsrate\n";
+        for (let cat in sessionStats) {
+            let s = sessionStats[cat];
+            let rate = s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%";
+            csvContent += `${cat};${s.correct};${s.total};${rate}\n`;
+        }
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Geografie_Lernstatistik.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    window.addEventListener("beforeunload", function (e) {
+        console.log("Sitzung beendet - Statistik aktualisiert.");
+    });
 </script>
 
 </body>

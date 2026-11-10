@@ -100,7 +100,7 @@ const europaDatenbank = [
     { nr: 39, land: "Luxemburg", hauptstadt: "Luxemburg", region: "Westeuropa", tipp: "Kleinstaat zwischen DE, FR, BE.", x: 39, y: 53 },
     { nr: 40, land: "Belgien", hauptstadt: "Brüssel", region: "Westeuropa", tipp: "Zwischen Frankreich und den Niederlanden.", x: 37, y: 51 },
     { nr: 41, land: "Monaco", hauptstadt: "Monaco", region: "Westeuropa", tipp: "Zwergstaat an der Côte d'Azur.", x: 40, y: 66 },
-    { nr: 42, land: "Liechtenstein", hauptstadt: "Vaduz", region: "Mitteleuropa", tipp: "Zwischen Schweiz und Österreich im Rheintal.", x: 43, y: 61 },
+    { nr: 48, land: "Liechtenstein", hauptstadt: "Vaduz", region: "Mitteleuropa", tipp: "Zwischen Schweiz und Österreich im Rheintal.", x: 43, y: 61 },
     { nr: 43, land: "San Marino", hauptstadt: "San Marino", region: "Südeuropa", tipp: "Eingeschlossen im nördlichen Italien.", x: 47, y: 67 },
     { nr: 44, land: "Vatikanstadt", hauptstadt: "Vatikanstadt", region: "Südeuropa", tipp: "Mitten in Rom (Italien).", x: 45, y: 69 },
     { nr: 45, land: "Andorra", hauptstadt: "Andorra la Vella", region: "Südeuropa", tipp: "In den Pyrenäen zwischen Frankreich und Spanien.", x: 30, y: 65 },

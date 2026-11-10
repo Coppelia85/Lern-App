@@ -56,8 +56,29 @@
         }
 
         .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
-        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; }
+        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; position: relative; }
         
+        /* Glühbirnen-Button für Tipps */
+        .bulb-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 2px solid #d69e2e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .bulb-btn:hover { background: #fffaf0; transform: translateY(-50%) scale(1.05); }
+
         input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; display: none; }
         .mc-grid { display: grid; gap: 10px; margin-bottom: 15px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500; text-align: left; }
@@ -65,7 +86,7 @@
 
         .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .action-btn:hover { background: #b7791f; }
-        .tip-box { background: #edf2f7; padding: 10px; border-radius: 6px; font-size: 0.9rem; color: #4a5568; margin-bottom: 12px; text-align: left; display: none; }
+        .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 12px; border-radius: 8px; font-size: 0.95rem; color: #744210; margin-bottom: 12px; text-align: left; display: none; }
     </style>
 </head>
 <body>
@@ -78,20 +99,21 @@
         <h3>Prüfungsvorbereitung konfigurieren:</h3>
         
         <div class="setup-group">
-            <label>Schwierigkeitsstufe:</label>
+            <label>Schwierigkeitsstufe & Karte:</label>
             <select id="difficulty-level">
                 <option value="adaptive">⚡ Adaptiv (Startet Stufe 1, steigt bei Erfolg auf!)</option>
-                <option value="1">Stufe 1: Multiple Choice</option>
-                <option value="2" selected>Stufe 2: Mit Nummernhilfe</option>
-                <option value="3">Stufe 3: Experten-Modus (Ohne Hilfen)</option>
+                <option value="1">Stufe 1: Multiple Choice (Mit Pin-Karte)</option>
+                <option value="2" selected>Stufe 2: Texteingabe mit Pin-Nummer</option>
+                <option value="3">Stufe 3: Experten-Modus (Stumme Karte ohne Pins)</option>
             </select>
         </div>
 
         <div class="setup-group">
-            <label>Themen / Fragetyp:</label>
+            <label>Fragetyp:</label>
             <select id="train-topic">
+                <option value="mixed">Gemischt (Länder & Hauptstädte)</option>
                 <option value="capital">Nur Hauptstädte abfragen</option>
-                <option value="mixed">Gemischt (Länder, Hauptstädte, Regionen)</option>
+                <option value="country">Nur Länder per Hauptstadt suchen</option>
             </select>
         </div>
 
@@ -113,12 +135,14 @@
     </div>
 
     <div class="map-wrapper" id="map-wrapper">
-        <!-- Verknüpft mit deinen neuen Karten: Regionen_europa.png (ohne Pins) und regionen_pin_europa.png (mit Pins) -->
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
         <div id="pins-container"></div>
     </div>
 
-    <div class="question-box" id="geo-question"></div>
+    <div class="question-box" id="geo-question">
+        <span id="question-text">Fragetext</span>
+        <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
+    </div>
     <div id="geo-tip" class="tip-box"></div>
 
     <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
@@ -145,16 +169,23 @@
         let generatedPool = [];
         europaDatenbank.forEach(item => {
             if (topic === "mixed" || topic === "capital") {
-                generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt });
-                if (topic === "mixed") {
-                    generatedPool.push({ type: "country", item: item, answer: item.land });
-                }
+                generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt, prompt: `Nenne die Hauptstadt von ${item.land}.`, tipPool: null, tipIndex: 0 });
+            }
+            if (topic === "mixed" || topic === "country") {
+                generatedPool.push({ type: "country", item: item, answer: item.land, prompt: `Welches Land hat die Hauptstadt ${item.hauptstadt}?`, tipPool: null, tipIndex: 0 });
             }
         });
 
+        // Neue Runde = Alle Kugeln zurück in den Topf / Komplett neu mischen für diese Runde
         generatedPool.sort(() => Math.random() - 0.5);
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
+
+        // Für jede ausgewählte Frage in dieser neuen Runde initialisieren wir den Tipp-Topf frisch (Ziehen ohne Zurücklegen)
+        activeQuestions.forEach(q => {
+            q.tipPool = buildTipPool(q.item);
+            q.tipIndex = 0; // Zeiger auf den ersten Tipp
+        });
 
         if (activeQuestions.length === 0) return;
 
@@ -167,15 +198,40 @@
         loadQuestion();
     }
 
+    function buildTipPool(item) {
+        let rawTips = [];
+        if (item.tipp) rawTips.push(item.tipp);
+        if (item.region) rawTips.push(`Gehört zur Region: ${item.region}`);
+        
+        if (typeof nachlaenderDatenbank !== 'undefined' && item.land === "Deutschland") {
+            rawTips.push("Nachbarländer: " + nachlaenderDatenbank.map(n => n.land).join(", "));
+        }
+        if (typeof gebirgeDatenbank !== 'undefined') {
+            let gebirge = gebirgeDatenbank.filter(g => g.laender && g.laender.includes(item.land));
+            if (gebirge.length > 0) rawTips.push("Liegt im Gebirge: " + gebirge.map(g => g.name).join(", "));
+        }
+
+        if (rawTips.length === 0) rawTips.push("Kein weiterer Hinweis verfügbar.");
+
+        // Einmalig beim Start der Runde für diese Frage ziehen ohne Zurücklegen vorbereiten (shuffeln)
+        rawTips.sort(() => Math.random() - 0.5);
+        return rawTips;
+    }
+
     function loadQuestion() {
         if (currentIndex >= activeQuestions.length) {
-            document.getElementById("geo-question").textContent = "🎉 Richtig stark! Du hast alle Fragen dieser Prüfungsrunde geschafft!";
+            document.getElementById("geo-question").style.display = "none";
             document.getElementById("geo-tip").style.display = "none";
             document.getElementById("geo-answer").style.display = "none";
             document.getElementById("check-btn").style.display = "none";
             document.getElementById("mc-container").style.display = "none";
             document.getElementById("map-wrapper").style.display = "none";
             document.getElementById("stats-bar").style.display = "none";
+            
+            let container = document.querySelector(".container");
+            let endMsg = document.createElement("div");
+            endMsg.innerHTML = "<h2>🎉 Richtig stark! Du hast alle Fragen dieser Prüfungsrunde geschafft!</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄 (Alle Kugeln zurück in den Topf!)</button>";
+            container.appendChild(endMsg);
             return;
         }
 
@@ -184,26 +240,25 @@
         document.getElementById("total-q-num").textContent = activeQuestions.length;
         document.getElementById("current-level-display").textContent = currentActiveLevel;
 
-        let promptText = "";
         let activePinNr = null;
-
         let mapImg = document.getElementById("geo-map-img");
+
         if (currentActiveLevel === 3) {
-            mapImg.src = "Regionen_europa.png"; // Stumme Karte ohne Pins
-            promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
+            mapImg.src = "Regionen_europa.png";
             activePinNr = null;
-        } else if (currentActiveLevel === 2) {
-            mapImg.src = "regionen_pin_europa.png"; // Karte mit Laser-Pins
-            promptText = `Nenne die Hauptstadt von Punkt ${qData.item.nr} (${qData.item.land}).`;
-            activePinNr = qData.item.nr;
         } else {
             mapImg.src = "regionen_pin_europa.png";
-            promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
             activePinNr = qData.item.nr;
         }
 
-        document.getElementById("geo-question").textContent = promptText;
+        let displayPrompt = qData.prompt;
+        if (currentActiveLevel === 2) {
+            displayPrompt = `Gesucht ist bei Punkt ${qData.item.nr}: ${qData.prompt}`;
+        }
+        document.getElementById("question-text").textContent = displayPrompt;
+
         document.getElementById("geo-tip").style.display = "none";
+        document.getElementById("geo-tip").textContent = "";
         document.getElementById("geo-feedback").textContent = "";
 
         renderAllMapPins(currentActiveLevel === 3 ? null : activePinNr);
@@ -219,6 +274,23 @@
             document.getElementById("check-btn").style.display = "block";
             document.getElementById("geo-answer").value = "";
             document.getElementById("geo-answer").focus();
+        }
+    }
+
+    function showNextTip() {
+        let qData = activeQuestions[currentIndex];
+        let tipBox = document.getElementById("geo-tip");
+        
+        if (!qData.tipPool || qData.tipPool.length === 0) return;
+
+        tipBox.style.display = "block";
+        tipBox.textContent = `💡 Tipp ${qData.tipIndex + 1} von ${qData.tipPool.length}: ${qData.tipPool[qData.tipIndex]}`;
+
+        // Nächsten Tipp aus dem Topf holen (Ziehen ohne Zurücklegen)
+        qData.tipIndex++;
+        // Wenn alle Tipps durch sind, wiederholt sich der erste (Index springt auf 0 zurück, Reihenfolge bleibt erhalten)
+        if (qData.tipIndex >= qData.tipPool.length) {
+            qData.tipIndex = 0;
         }
     }
 
@@ -276,38 +348,30 @@
     function getSimilarity(s1, s2) {
         let longer = s1;
         let shorter = s2;
-        if (s1.length < s2.length) {
-            longer = s2;
-            shorter = s1;
-        }
+        if (s1.length < s2.length) { longer = s2; shorter = s1; }
         let longerLength = longer.length;
         if (longerLength === 0) return 1.0;
         return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
     }
 
     function editDistance(s1, s2) {
-        s1 = s1.toLowerCase();
-        s2 = s2.toLowerCase();
+        s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
         let costs = new Array();
         for (let i = 0; i <= s1.length; i++) {
             let lastValue = i;
             for (let j = 0; j <= s2.length; j++) {
-                if (i === 0) {
-                    costs[j] = j;
-                } else {
+                if (i === 0) { costs[j] = j; }
+                else {
                     if (j > 0) {
                         let newValue = costs[j - 1];
                         if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
                             newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
                         }
-                        costs[j - 1] = lastValue;
-                        lastValue = newValue;
+                        costs[j - 1] = lastValue; lastValue = newValue;
                     }
                 }
             }
-            if (i > 0) {
-                costs[s2.length] = lastValue;
-            }
+            if (i > 0) { costs[s2.length] = lastValue; }
         }
         return costs[s2.length];
     }
@@ -320,16 +384,11 @@
         let normCorrect = normalizeStr(qData.answer);
 
         let similarity = getSimilarity(normUser, normCorrect);
-        // 70% Toleranz für die Klassenarbeit (LRS & Tippfehlerschutz)
-        let isCorrect = (normUser === normCorrect || similarity >= 0.7);
+        let isCorrect = (normUser === normCorrect || similarity >= 0.7); // 70% LRS-Schutz
 
         if (isCorrect) {
             document.getElementById("geo-feedback").style.color = "green";
             document.getElementById("geo-feedback").textContent = "Richtig! Super gemacht! 🌟";
-
-            let user = localStorage.getItem("activeUser") || "Gast";
-            let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
-            localStorage.setItem(`stats_geo_${user}`, count);
 
             if (selectedLevelSetting === "adaptive" && currentActiveLevel < 3) {
                 currentActiveLevel++;

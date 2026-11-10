@@ -524,33 +524,51 @@
         loadQuestion();
     }
 
-    function exportCSVStats() {
+        function exportCSVStats() {
+        // Master-Statistiken laden
         let masterData = JSON.parse(localStorage.getItem("master_learning_stats") || "{}");
         let geoXP = masterData.geografie || parseInt(localStorage.getItem("geo_user_xp") || "0");
         let vocabXP = masterData.vokabeln || parseInt(localStorage.getItem("vokabel_user_xp") || "0");
-        let masterTotal = geoXP + vocabXP;
 
-        let csvContent = "data:text/csv;charset=utf-8,Lernbereich;Gesammelte_XP\n";
-        csvContent += `Nur Geografie;${geoXP}\n`;
-        csvContent += `Nur Vokabeln (Sprachen);${vocabXP}\n`;
-        csvContent += `MASTER GESAMTSUMME;${masterTotal}\n\n`;
-        csvContent += "Kategorie;Erkannte_Fragen;Gesamt_Fragen;Erkennungsrate\n";
+        // CSV-Kopfbereich mit Filtern & Gesamtübersicht aufbauen
+        let csvContent = "data:text/csv;charset=utf-8,Lern-App Chef-Statistik (Geografie)\n";
+        csvContent += "Export-Datum;" + new Date().toLocaleDateString() + "\n\n";
         
-        let sessionStatsData = sessionStats;
-        for (let cat in sessionStatsData) {
-            let s = sessionStatsData[cat];
+        csvContent += "Bereich;Gesammelte_XP\n";
+        csvContent += `Geografie Gesamt;${geoXP}\n`;
+        csvContent += `Vokabeln Gesamt;${vocabXP}\n`;
+        csvContent += `MASTER GESAMTSUMME;${geoXP + vocabXP}\n\n`;
+
+        csvContent += "Detail-Kategorie;Erkannte_Fragen;Gesamt_Fragen;Erkennungsrate\n";
+        
+        let totalCorrectFiltered = 0;
+        let totalQuestionsFiltered = 0;
+
+        for (let cat in sessionStats) {
+            let s = sessionStats[cat];
             let rate = s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%";
+            
+            // Jede Kategorie einzeln und detailliert in die CSV schreiben
             csvContent += `${cat};${s.correct};${s.total};${rate}\n`;
+            
+            totalCorrectFiltered += s.correct;
+            totalQuestionsFiltered += s.total;
         }
 
+        // Saubere Summenzeile am Ende der gefilterten Ansicht
+        let overallRate = totalQuestionsFiltered > 0 ? Math.round((totalCorrectFiltered / totalQuestionsFiltered) * 100) + "%" : "0%";
+        csvContent += `\nGESAMTSUMME AUSWAHL;${totalCorrectFiltered};${totalQuestionsFiltered};${overallRate}\n`;
+
+        // Download-Prozess starten
         let encodedUri = encodeURI(csvContent);
         let link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Geografie_Lernstatistik.csv");
+        link.setAttribute("download", "Geografie_Chef_Statistik_Detail.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
+
 </script>
 
 </body>

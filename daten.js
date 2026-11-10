@@ -1,7 +1,3 @@
-// ==========================================
-// ZENTRALE DATENBANK & CONFIG
-// ==========================================
-
 const userConfig = {
     "King Knulwes": { passwort: "None", rolle: "Kind" },
     "Mini 14": { passwort: "None", rolle: "Kind" },
@@ -9,54 +5,8 @@ const userConfig = {
     "Chef": { passwort: "None", rolle: "Chef" }
 };
 
-// VOKABELN (Unit 1, Seiten 176 & 177)
-const vokabelDatenbank = [
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "feedback", deutsch: "Rückmeldung, Feedback", merksatz: "The hotel wants to get some feedback from the people who have stayed there." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to improve", deutsch: "verbessern, sich verbessern", merksatz: "This book helps you to improve your English. Your English will improve if you watch English films." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to react (to)", deutsch: "reagieren (auf)", merksatz: "I called him but he didn't react." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "content", deutsch: "Inhalt", merksatz: "Check the table of contents." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to connect", deutsch: "verbinden, verknüpfen", merksatz: "To link two ideas together." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to point sth. out (to sb.)", deutsch: "(jn.) auf etwas hinweisen", merksatz: "„Be careful!“ he said, and pointed out a snake in the grass." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "spelling", deutsch: "Rechtschreibung, Schreibweise", merksatz: "Check the spelling of difficult words." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "line", deutsch: "(U-Bahn-)Linie", merksatz: "Take the Central Line westbound to Oxford Circus." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "northbound", deutsch: "Richtung Norden", merksatz: "Travel northbound towards the city centre." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to change", deutsch: "umsteigen", merksatz: "Take the Bakerloo Line southbound and change to the Central Line westbound at Oxford Circus." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to be slow", deutsch: "nachgehen (Uhr)", merksatz: "It's twenty past eight. – No, it isn't. It's half past eight. Your watch is slow." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to work", deutsch: "funktionieren", merksatz: "I need your help. My computer doesn't work." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to head for sth.", deutsch: "auf etwas zusteuern / zugehen / zufahren", merksatz: "As soon as we arrived at the coast, we headed for the beach." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "announcement", deutsch: "Durchsage, Ansage", merksatz: "We'll have to wait for the announcement to find out where our train leaves." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "message", deutsch: "Botschaft, Aussage", merksatz: "1. Nachricht – John left a message for you. 2. Botschaft – I think the poem has an interesting message." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "platform", deutsch: "Bahnsteig, Gleis", merksatz: "Wait at platform 3 for the express train." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "to be on", deutsch: "eingeschaltet sein, an sein / laufen, übertragen werden", merksatz: "The lights are on, so they must be at home. The football is on." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "No way!", deutsch: "Auf keinen Fall! / Kommt nicht in Frage!", merksatz: "Dad, can you give me £120 for a new pair of jeans? – £120? No way!" },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "for hours/weeks/...", deutsch: "seit Stunden/Wochen/...", merksatz: "You've been watching TV for hours." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "since 10 o'clock/last week/...", deutsch: "seit 10 Uhr/letzter Woche/...", merksatz: "No, I haven't. I've been watching TV since 10." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "And anyway, ...", deutsch: "Und überhaupt, ...", merksatz: "I don't have time to go. And anyway, it's too expensive." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "176", fremd: "try", deutsch: "Versuch", merksatz: "verb: (to) try – noun: try" },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "remote control", deutsch: "Fernbedienung", merksatz: "Use the remote control to switch channels." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to turn sth. up/down", deutsch: "etwas lauter/leiser stellen", merksatz: "Can you turn up the radio? I want to hear the news." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to turn", deutsch: "sich drehen / umwenden / abbiegen", merksatz: "1. The London Eye turns very slowly. 2. The woman turned and looked at me. 3. First you turn left." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "each other", deutsch: "sich (gegenseitig), einander", merksatz: "Luke looked at Mo and Mo looked at Luke. = Luke and Mo looked at each other." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "pub", deutsch: "Kneipe, Lokal", merksatz: "Traditional British pub." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "a while", deutsch: "eine Weile, einige Zeit", merksatz: "First we watched the monkeys for a while." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "tap", deutsch: "(leichtes) Klopfen", merksatz: "In the middle of our lunch, we heard a tap on the door." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "Off you go now.", deutsch: "Ab mit euch! / Los mit euch jetzt!", merksatz: "Get ready and off you go." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "off", deutsch: "1. weg, los 2. von ... herunter", merksatz: "1. The thieves took our bag and ran off. 2. He fell off his bike." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to get off the bus/boat/plane", deutsch: "aus dem Bus/Boot/Flugzeug aussteigen", merksatz: "Get off at the next station." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to take sth. off", deutsch: "ausziehen (Kleidung); etwas absetzen", merksatz: "Take off your wet jacket." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to turn sth. off", deutsch: "etwas ausschalten", merksatz: "Turn off the lights when leaving." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "towards the station / Mr Bell", deutsch: "auf den Bahnhof / Mr Bell zu", merksatz: "When the fire started, everyone ran towards the door." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "tense", deutsch: "(grammatische) Zeit, Tempus", merksatz: "The past tense, the present tense, the future tense." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to go on", deutsch: "im Gang sein; andauern", merksatz: "The film was so boring, and it went on for hours." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "situation", deutsch: "Situation", merksatz: "Stress: situation." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "route", deutsch: "Strecke, Route", merksatz: "Find the best route on the map." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "speed", deutsch: "Geschwindigkeit", merksatz: "Check your speed." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "It was a pity that ...", deutsch: "Es war schade, dass ...", merksatz: "It's a pity that Jake can't come to our party." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to hold onto sth.", deutsch: "sich an etwas festhalten", merksatz: "She held onto the table and tried to stand up." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to scan sth. (for sth.)", deutsch: "etwas (nach etwas) absuchen", merksatz: "I scanned the crowd/the garden for my sister but couldn't see her." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "to fill", deutsch: "füllen", merksatz: "Fill the glass with water." },
-    { klasse: "Klasse 7", sprache: "Englisch", unit: "Unit 1", seite: "177", fremd: "pavement", deutsch: "Gehweg, Bürgersteig", merksatz: "Walk on the pavement, not on the road." }
-];
+// Hier deine bestehenden Datenbanken für Geografie einbinden (europaDatenbank, nachlaenderDatenbank, fluesseDatenbank, gebirgeDatenbank, meereDatenbank, inselnDatenbank, verdichtungsraeumeDatenbank).
+
 
 // EUROPA-DATENBANK (Komplett mit 1 bis 47)
 const europaDatenbank = [

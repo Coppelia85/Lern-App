@@ -309,15 +309,26 @@
         qData.tipIndex = (qData.tipIndex + 1) % qData.tipPool.length;
     }
 
-    function renderMultipleChoice(qData) {
+        function renderMultipleChoice(qData) {
         const mcContainer = document.getElementById("mc-container");
         mcContainer.innerHTML = "";
+
         let options = [qData.answer];
         while (options.length < 4) {
-            let rnd = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)].land;
-            if (!options.includes(rnd)) options.push(rnd);
+            let rndItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
+            let val = "";
+            
+            // Wenn nach einer Nummer gesucht wird, nur Nummern als Ablenkung anbieten!
+            if (qData.prompt.includes("Nummer trägt es")) {
+                val = rndItem.nr.toString();
+            } else {
+                val = qData.type === "capital" ? rndItem.hauptstadt : rndItem.land;
+            }
+
+            if (!options.includes(val)) options.push(val);
         }
         options.sort(() => Math.random() - 0.5);
+
         options.forEach(opt => {
             let btn = document.createElement("button");
             btn.className = "mc-btn";
@@ -326,6 +337,7 @@
             mcContainer.appendChild(btn);
         });
     }
+
 
     function normalizeStr(str) {
         return str.toLowerCase()

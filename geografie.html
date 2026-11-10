@@ -144,7 +144,7 @@
 
 <script src="daten.js"></script>
 <script>
-    let activeQuestions = [];
+     let activeQuestions = [];
     let currentIndex = 0;
     let currentActiveLevel = 2;
     let awaitingNext = false;
@@ -166,13 +166,10 @@
         let generatedPool = [];
 
         if (topicKey === "europa_mix") {
-            // Anti-Zahlen-Fixierung & Richtungs-Shuffle ab Stufe 1 mit 70/30-Verteilung (gerundet)
             europaDatenbank.forEach(item => {
                 let r = Math.random();
-                // 65% Chance Hauptrichtung (Land->Stadt oder Stadt->Land), max 70/30 Verteilung
                 let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
                 
-                // Surprise-Modus ab Stufe 2: Heimliche Zusatzverknüpfung im Hintergrund
                 let surpriseInfo = "";
                 if (currentActiveLevel >= 2 && item.region) {
                     surpriseInfo = ` (Surprise-Bonus: Region ${item.region})`;
@@ -424,3 +421,4 @@
 
 </body>
 </html>
+   

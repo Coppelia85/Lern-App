@@ -5,7 +5,7 @@
 const userConfig = {
     "King Knulwes": { passwort: "None", rolle: "Kind" },
     "Queen Katherine": { passwort: "None", rolle: "Kind" },
-    "Test": { passwort: "None", rolle: "Test" }
+    "Chef": { passwort: "47110815", rolle: "Chef" }
 };
 
 // VOKABELN (Unit 1, Seiten 176 & 177)

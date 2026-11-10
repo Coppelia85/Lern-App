@@ -27,7 +27,7 @@
         .map-wrapper img { width: 100%; height: auto; display: block; }
 
         .stats-bar { font-size: 0.95rem; color: #4a5568; margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 8px 12px; border-radius: 6px; }
-        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; position: relative; }
+        .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #744210; display: none; position: relative; padding-right: 60px; }
         
         /* Glühbirnen-Button für Tipps */
         .bulb-btn {
@@ -38,9 +38,9 @@
             background: white;
             border: 2px solid #d69e2e;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
+            width: 38px;
+            height: 38px;
+            font-size: 1.1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -50,13 +50,37 @@
         }
         .bulb-btn:hover { background: #fffaf0; transform: translateY(-50%) scale(1.05); }
 
+        /* Totenkopf-Notaus-Button */
+        .skull-btn {
+            position: absolute;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 2px solid #e53e3e;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .skull-btn:hover { background: #fff5f5; transform: translateY(-50%) scale(1.05); }
+
         input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; display: none; }
         .mc-grid { display: grid; gap: 10px; margin-bottom: 15px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500; text-align: left; }
         .mc-btn:hover { border-color: #d69e2e; background: #fffaf0; }
 
-        .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
         .action-btn:hover { background: #b7791f; }
+        .next-btn { background: #3182ce; display: none; }
+        .next-btn:hover { background: #2b6cb0; }
+
         .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 12px; border-radius: 8px; font-size: 0.95rem; color: #744210; margin-bottom: 12px; text-align: left; display: none; }
     </style>
 </head>
@@ -106,18 +130,22 @@
     </div>
 
     <div class="map-wrapper" id="map-wrapper">
-        <!-- Deine eigenen Karten mit festen Laser-Pins oder stumm -->
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
     </div>
 
     <div class="question-box" id="geo-question">
         <span id="question-text">Fragetext</span>
+        <!-- Notaus-Knopf ☠️ -->
+        <button class="skull-btn" onclick="endSessionEarly()" title="Runde sofort beenden (Notaus)">☠️</button>
+        <!-- Glühbirnen-Button 💡 -->
         <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
     </div>
     <div id="geo-tip" class="tip-box"></div>
 
     <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
     <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
+    
+    <button class="action-btn next-btn" id="next-btn" onclick="proceedNext()">Weiter zur nächsten Frage ➡️</button>
 
     <div class="mc-grid" id="mc-container"></div>
     <p id="geo-feedback" style="font-weight: bold; margin-top: 12px;"></p>
@@ -129,6 +157,7 @@
     let currentIndex = 0;
     let selectedLevelSetting = "adaptive";
     let currentActiveLevel = 2;
+    let awaitingNext = false;
 
     function startTraining() {
         selectedLevelSetting = document.getElementById("difficulty-level").value;
@@ -139,35 +168,22 @@
 
         let generatedPool = [];
         europaDatenbank.forEach(item => {
-            // Variante A: Hauptstadt von Punkt X suchen (Land wird im Text NICHT genannt, ist aber über die Glühbirne abrufbar!)
             if (topic === "mixed" || topic === "capital_by_point") {
-                generatedPool.push({ 
-                    type: "capital", 
-                    item: item, 
-                    answer: item.hauptstadt, 
-                    prompt: `Nenne die Hauptstadt von Punkt ${item.nr}.` 
-                });
+                generatedPool.push({ type: "capital", item: item, answer: item.hauptstadt, prompt: `Nenne die Hauptstadt von Punkt ${item.nr}.`, retryCount: 0 });
             }
-            // Variante B: Land von Punkt X suchen (Hauptstadt/Region als Tipp über Glühbirne)
             if (topic === "mixed" || topic === "country_by_point") {
-                generatedPool.push({ 
-                    type: "country", 
-                    item: item, 
-                    answer: item.land, 
-                    prompt: `Welches Land liegt bei Punkt ${item.nr}?` 
-                });
+                generatedPool.push({ type: "country", item: item, answer: item.land, prompt: `Welches Land liegt bei Punkt ${item.nr}?`, retryCount: 0 });
             }
         });
 
-        // Neue Runde = Alle Kugeln zurück in den Topf / neu mischen
         generatedPool.sort(() => Math.random() - 0.5);
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
 
-        // Für jede Frage den Tipp-Topf initialisieren (Ziehen ohne Zurücklegen)
         activeQuestions.forEach(q => {
             q.tipPool = buildTipPool(q.item, q.type);
             q.tipIndex = 0;
+            q.retryCount = 0;
         });
 
         if (activeQuestions.length === 0) return;
@@ -178,13 +194,12 @@
         document.getElementById("geo-question").style.display = "block";
 
         currentIndex = 0;
+        awaitingNext = false;
         loadQuestion();
     }
 
     function buildTipPool(item, qType) {
         let rawTips = [];
-        
-        // Der Name des Landes bzw. die Hauptstadt ist der wichtigste Tipp!
         if (qType === "capital") {
             rawTips.push(`Das Land zu Punkt ${item.nr} ist: ${item.land}`);
         } else {
@@ -194,33 +209,23 @@
         if (item.tipp) rawTips.push(item.tipp);
         if (item.region) rawTips.push(`Gehört zur Region: ${item.region}`);
         
-        // Gebirge-Verknüpfung
         if (typeof gebirgeDatenbank !== 'undefined') {
             let gebirge = gebirgeDatenbank.filter(g => g.laender && g.laender.includes(item.land));
             if (gebirge.length > 0) rawTips.push("Liegt im Gebirge: " + gebirge.map(g => g.name).join(", "));
         }
 
         if (rawTips.length === 0) rawTips.push("Kein weiterer Hinweis verfügbar.");
-
-        // Einmalig beim Start der Runde für diese Frage mischen (Ziehen ohne Zurücklegen)
         rawTips.sort(() => Math.random() - 0.5);
         return rawTips;
     }
 
     function loadQuestion() {
+        awaitingNext = false;
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("check-btn").style.display = "block";
+
         if (currentIndex >= activeQuestions.length) {
-            document.getElementById("geo-question").style.display = "none";
-            document.getElementById("geo-tip").style.display = "none";
-            document.getElementById("geo-answer").style.display = "none";
-            document.getElementById("check-btn").style.display = "none";
-            document.getElementById("mc-container").style.display = "none";
-            document.getElementById("map-wrapper").style.display = "none";
-            document.getElementById("stats-bar").style.display = "none";
-            
-            let container = document.querySelector(".container");
-            let endMsg = document.createElement("div");
-            endMsg.innerHTML = "<h2>🎉 Richtig stark! Du hast alle Fragen dieser Prüfungsrunde geschafft!</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄</button>";
-            container.appendChild(endMsg);
+            showEndScreen("🎉 Richtig stark! Du hast diese Prüfungsrunde abgeschlossen!");
             return;
         }
 
@@ -230,15 +235,9 @@
         document.getElementById("current-level-display").textContent = currentActiveLevel;
 
         let mapImg = document.getElementById("geo-map-img");
-        if (currentActiveLevel === 3) {
-            mapImg.src = "Regionen_europa.png"; // Stumme Karte
-        } else {
-            mapImg.src = "regionen_pin_europa.png"; // Karte mit deinen Laser-Pins
-        }
+        mapImg.src = (currentActiveLevel === 3) ? "Regionen_europa.png" : "regionen_pin_europa.png";
 
-        // Fragetext anzeigen (ohne direkt das Land zu verraten)
         document.getElementById("question-text").textContent = qData.prompt;
-
         document.getElementById("geo-tip").style.display = "none";
         document.getElementById("geo-tip").textContent = "";
         document.getElementById("geo-feedback").textContent = "";
@@ -257,21 +256,39 @@
         }
     }
 
+    function showEndScreen(titleText) {
+        document.getElementById("geo-question").style.display = "none";
+        document.getElementById("geo-tip").style.display = "none";
+        document.getElementById("geo-answer").style.display = "none";
+        document.getElementById("check-btn").style.display = "none";
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("mc-container").style.display = "none";
+        document.getElementById("map-wrapper").style.display = "none";
+        document.getElementById("stats-bar").style.display = "none";
+        
+        let container = document.querySelector(".container");
+        let endMsg = document.createElement("div");
+        endMsg.innerHTML = `<h2>${titleText}</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄</button>`;
+        container.appendChild(endMsg);
+    }
+
+    // ☠️ Notaus-Funktion: Runde sofort beenden
+    function endSessionEarly() {
+        if (confirm("Runde wirklich vorzeitig beenden?")) {
+            showEndScreen("☠️ Runde vorzeitig beendet! Kopf hoch, beim nächsten Mal sitzt es!");
+        }
+    }
+
     function showNextTip() {
         let qData = activeQuestions[currentIndex];
         let tipBox = document.getElementById("geo-tip");
-        
         if (!qData.tipPool || qData.tipPool.length === 0) return;
 
         tipBox.style.display = "block";
         tipBox.textContent = `💡 Tipp ${qData.tipIndex + 1} von ${qData.tipPool.length}: ${qData.tipPool[qData.tipIndex]}`;
 
-        // Nächsten Tipp ziehen ohne Zurücklegen
         qData.tipIndex++;
-        // Wenn alle Tipps durch sind, wiederholt sich der erste
-        if (qData.tipIndex >= qData.tipPool.length) {
-            qData.tipIndex = 0;
-        }
+        if (qData.tipIndex >= qData.tipPool.length) qData.tipIndex = 0;
     }
 
     function renderMultipleChoice(qData) {
@@ -304,8 +321,7 @@
     }
 
     function getSimilarity(s1, s2) {
-        let longer = s1;
-        let shorter = s2;
+        let longer = s1; let shorter = s2;
         if (s1.length < s2.length) { longer = s2; shorter = s1; }
         let longerLength = longer.length;
         if (longerLength === 0) return 1.0;
@@ -335,6 +351,7 @@
     }
 
     function checkAnswer(selectedOpt = null) {
+        if (awaitingNext) return;
         let qData = activeQuestions[currentIndex];
         let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
         
@@ -342,7 +359,11 @@
         let normCorrect = normalizeStr(qData.answer);
 
         let similarity = getSimilarity(normUser, normCorrect);
-        let isCorrect = (normUser === normCorrect || similarity >= 0.7); // 70% LRS-Schutz
+        let isCorrect = (normUser === normCorrect || similarity >= 0.7);
+
+        document.getElementById("geo-answer").style.display = "none";
+        document.getElementById("check-btn").style.display = "none";
+        document.getElementById("mc-container").style.display = "none";
 
         if (isCorrect) {
             document.getElementById("geo-feedback").style.color = "green";
@@ -357,13 +378,30 @@
                 loadQuestion();
             }, 1200);
         } else {
-            document.getElementById("geo-feedback").style.color = "red";
-            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer}`;
+            awaitingNext = true;
+            
+            if (qData.retryCount === 0) {
+                qData.retryCount++;
+                activeQuestions.push(qData);
+                document.getElementById("total-q-num").textContent = activeQuestions.length;
+                document.getElementById("geo-feedback").style.color = "red";
+                document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer} (Die Frage kommt am Ende noch einmal!)`;
+            } else {
+                document.getElementById("geo-feedback").style.color = "red";
+                document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer} (Endgültig beendet für diese Runde).`;
+            }
+
+            document.getElementById("next-btn").style.display = "block";
             
             if (selectedLevelSetting === "adaptive") {
                 currentActiveLevel = Math.max(1, currentActiveLevel - 1);
             }
         }
+    }
+
+    function proceedNext() {
+        currentIndex++;
+        loadQuestion();
     }
 </script>
 

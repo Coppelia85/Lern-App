@@ -113,7 +113,7 @@
     </div>
 
     <div class="map-wrapper" id="map-wrapper">
-        <img src="europa_karte.png" alt="Stumme Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
+        <img id="geo-map-img" src="europa_karte.png" alt="Stumme Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
         <div id="pins-container"></div>
     </div>
 
@@ -186,126 +186,23 @@
         let promptText = "";
         let activePinNr = null;
 
+        let mapImg = document.getElementById("geo-map-img");
         if (currentActiveLevel === 3) {
-            // Stufe 3: Ohne Hilfen
-            if (qData.type === "capital") promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
-            if (qData.type === "country") promptText = `Welches Land hat die Hauptstadt ${qData.item.hauptstadt}?`;
+            mapImg.src = "europa_karte.png";
+            promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
             activePinNr = null;
         } else if (currentActiveLevel === 2) {
-            // Stufe 2: Mit Nummernhilfe
-            if (qData.type === "capital") promptText = `Nenne die Hauptstadt von Punkt ${qData.item.nr} (${qData.item.land}).`;
-            if (qData.type === "country") promptText = `Welches Land verbirgt sich hinter Punkt ${qData.item.nr}?`;
+            mapImg.src = "europa_karte_nr.png";
+            mapImg.onerror = function() { this.src = 'europa_karte.png'; };
+            promptText = `Nenne die Hauptstadt von Punkt ${qData.item.nr} (${qData.item.land}).`;
             activePinNr = qData.item.nr;
         } else {
-            // Stufe 1: Multiple Choice
-            if (qData.type === "capital") promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
-            if (qData.type === "country") promptText = `Welches Land gehört zu Hauptstadt ${qData.item.hauptstadt}?`;
+            mapImg.src = "europa_karte_nr.png";
+            mapImg.onerror = function() { this.src = 'europa_karte.png'; };
+            promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
             activePinNr = qData.item.nr;
         }
 
         document.getElementById("geo-question").textContent = promptText;
         document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("geo-feedback").textContent = "";
-
-        renderAllMapPins(currentActiveLevel === 3 ? null : activePinNr);
-
-        if (currentActiveLevel === 1) {
-            document.getElementById("mc-container").style.display = "grid";
-            document.getElementById("geo-answer").style.display = "none";
-            document.getElementById("check-btn").style.display = "none";
-            renderMultipleChoice(qData);
-        } else {
-            document.getElementById("mc-container").style.display = "none";
-            document.getElementById("geo-answer").style.display = "block";
-            document.getElementById("check-btn").style.display = "block";
-            document.getElementById("geo-answer").value = "";
-            document.getElementById("geo-answer").focus();
-        }
-    }
-
-    function renderAllMapPins(activeNr) {
-        const container = document.getElementById("pins-container");
-        container.innerHTML = "";
-
-        europaDatenbank.forEach(item => {
-            if (item.x && item.y) {
-                let pin = document.createElement("div");
-                let isTarget = (item.nr === activeNr);
-                
-                pin.className = `map-pin ${isTarget ? 'highlight' : ''}`;
-                pin.style.left = `${item.x}%`;
-                pin.style.top = `${item.y}%`;
-                
-                let span = document.createElement("span");
-                span.textContent = item.nr;
-                pin.appendChild(span);
-
-                container.appendChild(pin);
-            }
-        });
-    }
-
-    function renderMultipleChoice(qData) {
-        const mcContainer = document.getElementById("mc-container");
-        mcContainer.innerHTML = "";
-
-        let options = [qData.answer];
-        while (options.length < 4) {
-            let randomItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-            let val = qData.type === "capital" ? randomItem.hauptstadt : randomItem.land;
-            if (!options.includes(val)) options.push(val);
-        }
-        options.sort(() => Math.random() - 0.5);
-
-        options.forEach(opt => {
-            let btn = document.createElement("button");
-            btn.className = "mc-btn";
-            btn.textContent = opt;
-            btn.onclick = () => checkAnswer(opt);
-            mcContainer.appendChild(btn);
-        });
-    }
-
-    // Hilfsfunktion zur Bereinigung von Umlaute-Problemen beim Textabgleich
-    function normalizeStr(str) {
-        return str.toLowerCase()
-            .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
-            .replace(/é/g, 'e').replace(/í/g, 'i').replace(/á/g, 'a')
-            .trim();
-    }
-
-    function checkAnswer(selectedOpt = null) {
-        let qData = activeQuestions[currentIndex];
-        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
-        
-        let isCorrect = (normalizeStr(userAnswer) === normalizeStr(qData.answer));
-
-        if (isCorrect) {
-            document.getElementById("geo-feedback").style.color = "green";
-            document.getElementById("geo-feedback").textContent = "Richtig! Super gemacht! 🌟";
-
-            let user = localStorage.getItem("activeUser") || "Gast";
-            let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
-            localStorage.setItem(`stats_geo_${user}`, count);
-
-            if (selectedLevelSetting === "adaptive" && currentActiveLevel < 3) {
-                currentActiveLevel++;
-            }
-
-            setTimeout(() => {
-                currentIndex++;
-                loadQuestion();
-            }, 1200);
-        } else {
-            document.getElementById("geo-feedback").style.color = "red";
-            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer}`;
-            
-            if (selectedLevelSetting === "adaptive") {
-                currentActiveLevel = Math.max(1, currentActiveLevel - 1);
-            }
-        }
-    }
-</script>
-
-</body>
-</html>
+        document.getElementById("geo-feedback").textContent =

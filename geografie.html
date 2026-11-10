@@ -173,34 +173,56 @@
         document.getElementById("geo-question").style.display = "block";
         currentIndex = 0; awaitingNext = false; loadQuestion();
     }
-    function loadQuestion() {
-        awaitingNext = false; document.getElementById("next-btn").style.display = "none"; document.getElementById("check-btn").style.display = "block";
+        function loadQuestion() {
+        awaitingNext = false;
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("check-btn").style.display = "block";
+
         if (currentIndex >= activeQuestions.length) {
-            let bonusText = "";
-            if (roundErrorsCount === 0) { userXP += 5; localStorage.setItem("geo_user_xp", userXP); bonusText = "<br>🔥 <b>Perfekte Runde! +5 Bonus-XP!</b>"; }
-            updateXPDisplay();
-            showEndScreen(`🎉 Richtig stark! Runde abgeschlossen!${bonusText}<br><br>⚡ XP-Gesamt: ${userXP} XP<br>🏆 Trophäen: ${unlockedTrophies.length}`);
+            let totalCorrectAll = Object.values(sessionStats).reduce((sum, cat) => sum + cat.correct, 0);
+            showEndScreen(`🎉 Richtig stark! Runde abgeschlossen!<br><br>⚡ XP-Gesamt: ${userXP} XP<br>🏆 Trophäen: ${unlockedTrophies.length}`);
             let masterData = JSON.parse(localStorage.getItem("master_learning_stats") || "{}");
             masterData.geografie = (masterData.geografie || 0) + userXP;
             localStorage.setItem("master_learning_stats", JSON.stringify(masterData));
             return;
         }
+
         let qData = activeQuestions[currentIndex];
+        
+        // --- HIER WIRD DER FRAGETEXT JETZT SOFORT KORREKT GESETZT ---
+        document.getElementById("question-text").textContent = qData.prompt;
+        document.getElementById("geo-question").style.display = "block";
+        // -------------------------------------------------------------
+
         document.getElementById("current-q-num").textContent = currentIndex + 1;
         document.getElementById("total-q-num").textContent = activeQuestions.length;
         document.getElementById("current-cat-display").textContent = qData.cat;
+
         let mapImg = document.getElementById("geo-map-img");
-        mapImg.src = (qData.useCleanMap || currentActiveLevel === 3) ? "europa_karte.png" : "regionen_pin_europa.png";
-        document.getElementById("question-text").textContent = qData.prompt;
-        document.getElementById("geo-tip").style.display = "none"; document.getElementById("geo-tip").textContent = ""; document.getElementById("geo-feedback").textContent = "";
+        if (qData.useCleanMap || currentActiveLevel === 3) {
+            mapImg.src = "europa_karte.png";
+        } else {
+            mapImg.src = "regionen_pin_europa.png";
+        }
+
+        document.getElementById("geo-tip").style.display = "none";
+        document.getElementById("geo-tip").textContent = "";
+        document.getElementById("geo-feedback").textContent = "";
+
         if (currentActiveLevel === 1) {
-            document.getElementById("mc-container").style.display = "grid"; document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none";
+            document.getElementById("mc-container").style.display = "grid";
+            document.getElementById("input-row").style.display = "none";
+            document.getElementById("check-btn").style.display = "none";
             renderMultipleChoice(qData);
         } else {
-            document.getElementById("mc-container").style.display = "none"; document.getElementById("input-row").style.display = "flex"; document.getElementById("check-btn").style.display = "block";
-            document.getElementById("geo-answer").value = ""; document.getElementById("geo-answer").focus();
+            document.getElementById("mc-container").style.display = "none";
+            document.getElementById("input-row").style.display = "flex";
+            document.getElementById("check-btn").style.display = "block";
+            document.getElementById("geo-answer").value = "";
+            document.getElementById("geo-answer").focus();
         }
     }
+
     function showEndScreen(titleText) {
         document.getElementById("geo-question").style.display = "none"; document.getElementById("geo-tip").style.display = "none"; document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none"; document.getElementById("next-btn").style.display = "none"; document.getElementById("mc-container").style.display = "none"; document.getElementById("map-wrapper").style.display = "none"; document.getElementById("stats-bar").style.display = "none";
         let container = document.querySelector(".container"), endMsg = document.createElement("div");

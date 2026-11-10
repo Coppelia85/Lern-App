@@ -177,7 +177,7 @@
 
         let generatedPool = [];
 
-        if (topicKey === "europa_mix") {
+               if (topicKey === "europa_mix") {
             europaDatenbank.forEach(item => {
                 let r = Math.random();
                 let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
@@ -189,11 +189,21 @@
                 } else if (subType === "find_number") {
                     generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), item: item });
                 } else {
+                    // Wahr/Falsch-Frage mit automatischer Prüfung (stimmt es zufällig doch?)
                     let randomOther = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-                    let wrongCap = randomOther.hauptstadt;
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${wrongCap} die Hauptstadt von ${item.land}? (Antworte mit Nein und nenne die richtige)`, answer: item.hauptstadt, item: item });
+                    let testCap = randomOther.hauptstadt;
+                    
+                    if (testCap === item.hauptstadt) {
+                        // Falls es zufällig die richtige ist, machen wir eine echte Ja-Frage drauff
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? (Antworte mit Ja oder Nein)`, answer: "ja", item: item });
+                    } else {
+                        // Falsche Hauptstadt -> exakt deine Formulierung!
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? (Falls nein: Antworte mit Nein und nenne die richtige)`, answer: item.hauptstadt, item: item });
+                    }
                 }
             });
+        }
+
         } else if (topicKey === "nachlaender") {
             nachlaenderDatenbank.forEach(n => {
                 generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, item: { land: n.land, tipp: "Grenzt direkt an Deutschland" } });

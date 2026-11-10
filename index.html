@@ -5,17 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lern-App Zentrale</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .container { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         h1 { color: #2b6cb0; margin-top: 5px; font-size: 1.6rem; }
-        p { color: #4a5568; font-size: 0.95rem; margin-bottom: 25px; }
+        p { color: #4a5568; font-size: 0.95rem; margin-bottom: 20px; }
         
+        .user-box { background: #edf2f7; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: #2b6cb0; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 1rem; background: white; }
+
         .menu-grid { display: grid; gap: 15px; }
         .menu-card {
-            background: #ebf8ff; border: 2px solid #3182ce; padding: 20px; border-radius: 12px;
+            background: #ebf8ff; border: 2px solid #3182ce; padding: 18px; border-radius: 12px;
             text-decoration: none; color: #2b6cb0; font-weight: bold; font-size: 1.1rem;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer;
         }
         .menu-card:hover { background: #bee3f8; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
@@ -27,19 +31,56 @@
 
 <div class="container">
     <h1>🚀 Lern-App Zentrale</h1>
-    <p>Wähle deinen Trainingsbereich aus:</p>
+    <p>Wähle deinen Namen und starte deinen Trainingsbereich:</p>
+
+    <!-- Benutzer-Auswahl für die Statistik-Zuordnung -->
+    <div class="user-box">
+        <label for="user-select">Wer lernt gerade?</label>
+        <select id="user-select" onchange="speichereUser()">
+            <option value="King Knulwes">King Knulwes</option>
+            <option value="Mini 14">Mini 14</option>
+            <option value="Queen Katherine">Queen Katherine</option>
+            <option value="Chef">🔒 Chef (Eltern-Bereich)</option>
+        </select>
+    </div>
 
     <div class="menu-grid">
-        <!-- Wichtig: Der Dateiname muss exakt wie auf GitHub heißen -->
-        <a href="geografie.html" class="menu-card geo-card">
+        <a href="geografie.html" class="menu-card geo-card" onclick="speichereUser()">
             🌍 Europa-Geografie Prüfungstrainer
         </a>
         
-        <a href="vokabeln.html" class="menu-card">
+        <a href="vokabeln.html" class="menu-card" onclick="speichereUser()">
             🗣️ Vokabel- & Sprachen-Trainer (Französisch / Englisch)
         </a>
     </div>
 </div>
+
+<script>
+    // Speichert den ausgewählten Benutzer direkt im Browser, damit die Trainer wissen, wer aktiv ist
+    function speichereUser() {
+        let selectField = document.getElementById("user-select");
+        if (selectField) {
+            localStorage.setItem("aktiver_lern_user", selectField.value);
+        }
+    }
+
+    // Beim Laden der Seite prüfen, ob bereits ein Nutzer gespeichert war, und das Dropdown entsprechend setzen
+    window.onload = function() {
+        let savedUser = localStorage.getItem("aktiver_lern_user");
+        if (savedUser) {
+            let selectField = document.getElementById("user-select");
+            // Prüfen ob der Wert in den Optionen existiert
+            for (let i = 0; i < selectField.options.length; i++) {
+                if (selectField.options[i].value === savedUser) {
+                    selectField.selectedIndex = i;
+                    break;
+                }
+            }
+        } else {
+            speichereUser(); // Standardwert direkt sichern
+        }
+    };
+</script>
 
 </body>
 </html>

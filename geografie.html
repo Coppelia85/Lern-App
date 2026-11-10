@@ -85,7 +85,7 @@
             </select>
         </div>
 
-               <div class="setup-group">
+        <div class="setup-group">
             <label>Themenbereich:</label>
             <select id="train-topic">
                 <option value="europa_mix">Städte & Länder</option>
@@ -96,7 +96,6 @@
                 <option value="verdichtung">Verdichtungsräume & Ballungsgebiete</option>
             </select>
         </div>
-
 
         <div class="setup-group">
             <label>Anzahl der Fragen:</label>
@@ -109,7 +108,6 @@
 
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
 
-        <!-- Nur für Rolle Chef sichtbarer Bereich -->
         <div class="admin-box" id="chef-admin-box">
             <b>🔒 Eltern-Statistik (Chef):</b><br>
             <button onclick="exportCSVStats()" style="margin-top:6px; padding:6px 10px; background:#2b6cb0; color:white; border:none; border-radius:4px; cursor:pointer;">Statistik als Excel/CSV exportieren 📊</button>
@@ -160,7 +158,6 @@
         "Verdichtungsräume": { total: 0, correct: 0 }
     };
 
-    // Prüfen, ob eingemeldeter User die Rolle "Chef" hat
     window.addEventListener("DOMContentLoaded", () => {
         let activeUser = localStorage.getItem("activeUser");
         if (activeUser && typeof userConfig !== 'undefined' && userConfig[activeUser]) {
@@ -170,7 +167,7 @@
         }
     });
 
-        function startTraining() {
+    function startTraining() {
         currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
         let topicKey = document.getElementById("train-topic").value;
         let limitVal = document.getElementById("question-limit").value;
@@ -195,7 +192,7 @@
                     if (testCap === item.hauptstadt) {
                         generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}?`, answer: "ja", item: item, mode: "tf" });
                     } else {
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Nenne die richtige Hauptstadt.`, answer: item.hauptstadt, item: item, mode: "capital" });
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Antworte mit Nein und nenne die richtige.`, answer: item.hauptstadt, item: item, mode: "capital" });
                     }
                 }
             });
@@ -218,82 +215,6 @@
         } else if (topicKey === "verdichtung") {
             verdichtungsraeumeDatenbank.forEach(v => {
                 generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Ballungsraum gehört zu Städten wie ${v.städte[0]}?`, answer: v.name, item: { land: v.name, tipp: "Wirtschafts- und Ballungsraum in " + v.land }, mode: "area" });
-            });
-        }
-
-        generatedPool.sort(() => Math.random() - 0.5);
-        let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
-        activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
-
-        activeQuestions.forEach(q => {
-            q.tipPool = [q.item.tipp || "Kein weiterer Tipp verfügbar", `Anfangsbuchstabe: ${q.answer.charAt(0)}`];
-            q.tipIndex = 0;
-            q.retryCount = 0;
-        });
-
-        if (activeQuestions.length === 0) return;
-
-        document.getElementById("setup-screen").style.display = "none";
-        document.getElementById("stats-bar").style.display = "flex";
-        document.getElementById("map-wrapper").style.display = "block";
-        document.getElementById("geo-question").style.display = "block";
-
-        currentIndex = 0;
-        awaitingNext = false;
-        loadQuestion();
-    }
-
-    function renderMultipleChoice(qData) {
-        const mcContainer = document.getElementById("mc-container");
-        mcContainer.innerHTML = "";
-
-        let options = [qData.answer];
-        while (options.length < 4) {
-            let rndItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-            let val = "";
-            
-            if (qData.mode === "number") {
-                val = rndItem.nr.toString();
-            } else if (qData.mode === "country") {
-                val = rndItem.land;
-            } else if (qData.mode === "tf") {
-                val = Math.random() > 0.5 ? "ja" : "nein";
-            } else {
-                val = rndItem.hauptstadt;
-            }
-
-            if (!options.includes(val)) options.push(val);
-        }
-        options.sort(() => Math.random() - 0.5);
-
-        options.forEach(opt => {
-            let btn = document.createElement("button");
-            btn.className = "mc-btn";
-            btn.textContent = opt;
-            btn.onclick = () => checkAnswer(opt);
-            mcContainer.appendChild(btn);
-        });
-    }
-
-        } else if (topicKey === "nachlaender") {
-            nachlaenderDatenbank.forEach(n => {
-                generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, item: { land: n.land, tipp: "Grenzt direkt an Deutschland" } });
-            });
-        } else if (topicKey === "fluesse") {
-            fluesseDatenbank.forEach(f => {
-                generatedPool.push({ cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, item: { land: f.name, tipp: f.info } });
-            });
-        } else if (topicKey === "gebirge") {
-            gebirgeDatenbank.forEach(g => {
-                generatedPool.push({ cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, item: { land: g.name, tipp: "Länder: " + g.laender.join(", ") } });
-            });
-        } else if (topicKey === "meere") {
-            meereDatenbank.forEach(m => {
-                generatedPool.push({ cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, item: { land: m.name, tipp: "Gewässer in Europa" } });
-            });
-        } else if (topicKey === "verdichtung") {
-            verdichtungsraeumeDatenbank.forEach(v => {
-                generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Ballungsraum gehört zu Städten wie ${v.städte[0]}?`, answer: v.name, item: { land: v.name, tipp: "Wirtschafts- und Ballungsraum in " + v.land } });
             });
         }
 
@@ -390,7 +311,7 @@
         qData.tipIndex = (qData.tipIndex + 1) % qData.tipPool.length;
     }
 
-        function renderMultipleChoice(qData) {
+    function renderMultipleChoice(qData) {
         const mcContainer = document.getElementById("mc-container");
         mcContainer.innerHTML = "";
 
@@ -399,11 +320,14 @@
             let rndItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
             let val = "";
             
-            // Wenn nach einer Nummer gesucht wird, nur Nummern als Ablenkung anbieten!
-            if (qData.prompt.includes("Nummer trägt es")) {
+            if (qData.mode === "number") {
                 val = rndItem.nr.toString();
+            } else if (qData.mode === "country") {
+                val = rndItem.land;
+            } else if (qData.mode === "tf") {
+                val = Math.random() > 0.5 ? "ja" : "nein";
             } else {
-                val = qData.type === "capital" ? rndItem.hauptstadt : rndItem.land;
+                val = rndItem.hauptstadt;
             }
 
             if (!options.includes(val)) options.push(val);
@@ -418,7 +342,6 @@
             mcContainer.appendChild(btn);
         });
     }
-
 
     function normalizeStr(str) {
         return str.toLowerCase()

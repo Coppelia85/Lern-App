@@ -8,63 +8,37 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 750px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
         h1 { color: #3182ce; margin-top: 5px; font-size: 1.3rem; }
-        
         .setup-box { background: #ebf8ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
         .setup-group { margin-bottom: 10px; }
         label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; color: #2b6cb0; }
         select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; }
-
         .stats-bar { font-size: 0.85rem; color: #4a5568; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; flex-wrap: wrap; gap: 4px; }
         .question-box { background: #fefcbf; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: #744210; display: none; }
-        
         .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; display: none; }
         input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; box-sizing: border-box; }
-        
-        .bulb-btn {
-            background: white; border: 2px solid #d69e2e; border-radius: 8px; width: 48px; height: 48px;
-            font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
-        }
-        .bulb-btn:hover { background: #fffaf0; transform: scale(1.05); }
-
-        .exit-btn {
-            background: white; border: 2px solid #e53e3e; border-radius: 8px; width: 48px; height: 48px;
-            font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
-        }
-        .exit-btn:hover { background: #fff5f5; transform: scale(1.05); }
-
+        .bulb-btn, .exit-btn { background: white; border-radius: 8px; width: 48px; height: 48px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .bulb-btn { border: 2px solid #d69e2e; } .exit-btn { border: 2px solid #e53e3e; }
         .mc-grid { display: grid; gap: 8px; margin-bottom: 12px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 10px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 500; text-align: left; }
-        .mc-btn:hover { border-color: #3182ce; background: #ebf8ff; }
-
         .action-btn { background: #3182ce; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
-        .action-btn:hover { background: #2b6cb0; }
-        .next-btn { background: #3182ce; display: none; }
-        .next-btn:hover { background: #2b6cb0; }
-
         .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
         .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; display: block; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div style="text-align: left;"><a href="index.html">⬅ Zurück zum Menü</a></div>
     <h1>🗣️ Vokabel- & Sprachen-Trainer</h1>
-
     <div id="setup-screen" class="setup-box">
         <h3>Training konfigurieren:</h3>
-
         <div class="setup-group">
             <label>Sprache / Bereich:</label>
             <select id="train-language">
                 <option value="fr">🇫🇷 Nur Französisch</option>
-                <option value="en">🇬🇧 Nur Englisch (Erweiterbar)</option>
+                <option value="en">🇬🇧 Nur Englisch</option>
                 <option value="all_languages" selected>🌐 Alle Sprachen kombiniert</option>
             </select>
         </div>
-        
         <div class="setup-group">
             <label>Abfrage-Richtung:</label>
             <select id="train-direction">
@@ -73,7 +47,6 @@
                 <option value="mix" selected>Gemischt (Beide Richtungen)</option>
             </select>
         </div>
-
         <div class="setup-group">
             <label>Schwierigkeitsstufe & Modus:</label>
             <select id="difficulty-level">
@@ -82,7 +55,6 @@
                 <option value="3">Stufe 3: Experten-Modus (2 XP)</option>
             </select>
         </div>
-
         <div class="setup-group">
             <label>Einheit / Thema:</label>
             <select id="train-topic">
@@ -91,9 +63,10 @@
                 <option value="Unité 2 Volet 1">Unité 2 Volet 1</option>
                 <option value="Unité 2 Volet 2">Unité 2 Volet 2</option>
                 <option value="Unité 2 Volet 3">Unité 2 Volet 3</option>
+                <option value="Unit 1">Unit 1 (Englisch)</option>
+                <option value="Unit 2">Unit 2 (Englisch)</option>
             </select>
         </div>
-
         <div class="setup-group">
             <label>Anzahl der Vokabeln:</label>
             <select id="question-limit">
@@ -103,64 +76,36 @@
                 <option value="all">Alle verfügbaren Vokabeln</option>
             </select>
         </div>
-
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
-
         <div class="admin-box" id="chef-admin-box">
             <b>🔒 Eltern-Statistik (Chef):</b><br>
             <button onclick="exportCSVStats()" style="margin-top:6px; padding:6px 10px; background:#2b6cb0; color:white; border:none; border-radius:4px; cursor:pointer;">Statistik & Master-Auswertung (CSV) 📊</button>
         </div>
     </div>
-
     <div class="stats-bar" id="stats-bar" style="display: none;">
         <span>Vokabel <span id="current-q-num">1</span>/<span id="total-q-num">0</span></span>
         <span>⚡ XP: <span id="user-xp">0</span></span>
         <span>🏆 Trophäen: <span id="user-trophies-count">0</span></span>
     </div>
-
-    <div class="question-box" id="geo-question">
-        <span id="question-text">Fragetext</span>
-    </div>
-    
+    <div class="question-box" id="geo-question"><span id="question-text">Fragetext</span></div>
     <div id="geo-tip" class="tip-box"></div>
-
     <div class="input-row" id="input-row">
         <input type="text" id="geo-answer" placeholder="Übersetzung eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
         <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
         <button class="exit-btn" onclick="endSessionEarly()" title="Runde vorzeitig beenden">☠️</button>
     </div>
-
     <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
     <button class="action-btn next-btn" id="next-btn" onclick="proceedNext()">Weiter zur nächsten Vokabel ➡️</button>
-
     <div class="mc-grid" id="mc-container"></div>
     <p id="geo-feedback" style="font-weight: bold; margin-top: 10px;"></p>
 </div>
-
 <script src="vokabeln_daten.js"></script>
 <script>
-    let activeQuestions = [];
-    let currentIndex = 0;
-    let currentActiveLevel = 2;
-    let awaitingNext = false;
-    let roundErrorsCount = 0; // Zählt Fehler für die 5 Bonus-XP
-
+    let activeQuestions = [], currentIndex = 0, currentActiveLevel = 2, awaitingNext = false, roundErrorsCount = 0;
     let userVocabXP = parseInt(localStorage.getItem("vokabel_user_xp") || "0");
     let unlockedTrophies = JSON.parse(localStorage.getItem("vokabel_user_trophies") || "[]");
-
-    let sessionStats = {
-        "Französisch (Fr)": { total: 0, correct: 0 },
-        "Englisch (En)": { total: 0, correct: 0 },
-        "Unité 2 Volet 1": { total: 0, correct: 0 },
-        "Unité 2 Volet 2": { total: 0, correct: 0 },
-        "Unité 2 Volet 3": { total: 0, correct: 0 }
-    };
-
-    function updateXPDisplay() {
-        document.getElementById("user-xp").textContent = userVocabXP;
-        document.getElementById("user-trophies-count").textContent = unlockedTrophies.length;
-    }
-
+    let sessionStats = { "Französisch (Fr)": {total:0,correct:0}, "Englisch (En)": {total:0,correct:0}, "Unité 2 Volet 1": {total:0,correct:0}, "Unité 2 Volet 2": {total:0,correct:0}, "Unité 2 Volet 3": {total:0,correct:0}, "Unit 1 (Englisch)": {total:0,correct:0}, "Unit 2 (Englisch)": {total:0,correct:0} };
+    function updateXPDisplay() { document.getElementById("user-xp").textContent = userVocabXP; document.getElementById("user-trophies-count").textContent = unlockedTrophies.length; }
     function checkTrophies(earnedCorrectTotal) {
         let newTrophies = [];
         let possibleTrophies = [
@@ -169,183 +114,73 @@
             { id: 'v_expert', name: '🥇 Vokabel-Profi (25 richtige Vokabeln)', condition: earnedCorrectTotal >= 25 },
             { id: 'v_master', name: '🏆 Sprachen-Champion (50 richtige Vokabeln)', condition: earnedCorrectTotal >= 50 }
         ];
-
-        possibleTrophies.forEach(t => {
-            if (t.condition && !unlockedTrophies.includes(t.id)) {
-                unlockedTrophies.push(t.id);
-                newTrophies.push(t.name);
-            }
-        });
-
-        if (newTrophies.length > 0) {
-            localStorage.setItem("vokabel_user_trophies", JSON.stringify(unlockedTrophies));
-            updateXPDisplay();
-            setTimeout(() => {
-                alert(`🎉 Trophäe freigeschaltet!\n\n• ${newTrophies.join("\n• ")}`);
-            }, 500);
-        }
+        possibleTrophies.forEach(t => { if (t.condition && !unlockedTrophies.includes(t.id)) { unlockedTrophies.push(t.id); newTrophies.push(t.name); } });
+        if (newTrophies.length > 0) { localStorage.setItem("vokabel_user_trophies", JSON.stringify(unlockedTrophies)); updateXPDisplay(); setTimeout(() => alert(`🎉 Trophäe freigeschaltet!\n\n• ${newTrophies.join("\n• ")}`), 500); }
     }
-
     function startTraining() {
         currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
-        let langChoice = document.getElementById("train-language").value;
-        let topicKey = document.getElementById("train-topic").value;
-        let direction = document.getElementById("train-direction").value;
-        let limitVal = document.getElementById("question-limit").value;
+        let langChoice = document.getElementById("train-language").value, topicKey = document.getElementById("train-topic").value;
+        let direction = document.getElementById("train-direction").value, limitVal = document.getElementById("question-limit").value;
         roundErrorsCount = 0;
-
-        // Vokabeln nach Sprachfilter vorsortieren
-        let basePool = [];
-        if (typeof vokabelDatenbank !== 'undefined') {
-            basePool = vokabelDatenbank.filter(v => {
-                let lang = v.lang || "fr"; // Standardmäßig Französisch, falls nicht anders angegeben
-                if (langChoice === "all_languages") return true;
-                return lang === langChoice;
-            });
-        }
-
-        let filteredPool = topicKey === "all" 
-            ? [...basePool] 
-            : basePool.filter(v => v.einheit === topicKey);
-
+        let basePool = (typeof vokabelDatenbank !== 'undefined') ? vokabelDatenbank.filter(v => langChoice === "all_languages" || (v.lang || "fr") === langChoice) : [];
+        let filteredPool = topicKey === "all" ? [...basePool] : basePool.filter(v => v.einheit === topicKey);
         let generatedPool = [];
-
         filteredPool.forEach(item => {
-            let mode = direction;
-            if (direction === "mix") {
-                mode = Math.random() > 0.5 ? "foreign_de" : "de_foreign";
-            }
-
+            let mode = direction === "mix" ? (Math.random() > 0.5 ? "foreign_de" : "de_foreign") : direction;
             let categoryName = (item.lang === "en") ? "Englisch (En)" : "Französisch (Fr)";
-
-            if (mode === "foreign_de") {
-                generatedPool.push({
-                    cat: categoryName,
-                    subCat: item.einheit,
-                    prompt: `Was bedeutet auf Deutsch: "${item.foreign}"?`,
-                    answer: item.de,
-                    synonyms: item.synonyms || [],
-                    item: item,
-                    mode: "foreign_de"
-                });
-            } else {
-                generatedPool.push({
-                    cat: categoryName,
-                    subCat: item.einheit,
-                    prompt: `Wie schreibt man in der Fremdsprache: "${item.de}"?`,
-                    answer: item.foreign,
-                    synonyms: item.synonyms || [],
-                    item: item,
-                    mode: "de_foreign"
-                });
-            }
+            if (mode === "foreign_de") generatedPool.push({cat: categoryName, prompt: `Was bedeutet auf Deutsch: "${item.foreign}"?`, answer: item.de, synonyms: item.synonyms || [], item, mode: "foreign_de"});
+            else generatedPool.push({cat: categoryName, prompt: `Wie schreibt man in der Fremdsprache: "${item.de}"?`, answer: item.foreign, synonyms: item.synonyms || [], item, mode: "de_foreign"});
         });
-
         generatedPool.sort(() => Math.random() - 0.5);
         let limit = limitVal === "all" ? generatedPool.length : parseInt(limitVal);
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
-
-        activeQuestions.forEach(q => {
-            q.tipPool = [`Anfangsbuchstabe: ${q.answer.charAt(0)}`, `Länge: ${q.answer.length} Zeichen`];
-            q.tipIndex = 0;
-            q.retryCount = 0;
-        });
-
-        if (activeQuestions.length === 0) {
-            alert("Keine Vokabeln für diese Sprach- oder Einheitsauswahl gefunden!");
-            return;
-        }
-
+        activeQuestions.forEach(q => { q.tipPool = [`Anfangsbuchstabe: ${q.answer.charAt(0)}`, `Länge: ${q.answer.length} Zeichen`]; q.tipIndex = 0; q.retryCount = 0; });
+        if (activeQuestions.length === 0) { alert("Keine Vokabeln für diese Auswahl gefunden!"); return; }
         updateXPDisplay();
-        document.getElementById("setup-screen").style.display = "none";
-        document.getElementById("stats-bar").style.display = "flex";
-        document.getElementById("geo-question").style.display = "block";
-
-        currentIndex = 0;
-        awaitingNext = false;
-        loadQuestion();
+        document.getElementById("setup-screen").style.display = "none"; document.getElementById("stats-bar").style.display = "flex"; document.getElementById("geo-question").style.display = "block";
+        currentIndex = 0; awaitingNext = false; loadQuestion();
     }
-
     function loadQuestion() {
-        awaitingNext = false;
-        document.getElementById("next-btn").style.display = "none";
-        document.getElementById("check-btn").style.display = "block";
-
+        awaitingNext = false; document.getElementById("next-btn").style.display = "none"; document.getElementById("check-btn").style.display = "block";
         if (currentIndex >= activeQuestions.length) {
             let bonusText = "";
-            if (roundErrorsCount === 0) {
-                userVocabXP += 5;
-                localStorage.setItem("vokabel_user_xp", userVocabXP);
-                bonusText = "<br>🔥 <b>Perfekte Vokabel-Runde! +5 Bonus-XP!</b>";
-            }
+            if (roundErrorsCount === 0) { userVocabXP += 5; localStorage.setItem("vokabel_user_xp", userVocabXP); bonusText = "<br>🔥 <b>Perfekte Vokabel-Runde! +5 Bonus-XP!</b>"; }
             updateXPDisplay();
-            showEndScreen(`🎉 Richtig stark! Vokabel-Runde abgeschlossen!{bonusText}<br><br>⚡ Vokabel-XP: ${userVocabXP} XP<br>🏆 Trophäen: ${unlockedTrophies.length}`);
-            
-            // Master-Statistik für Master-Aufzeichnung eintragen
+            showEndScreen(`🎉 Richtig stark! Vokabel-Runde abgeschlossen!${bonusText}<br><br>⚡ Vokabel-XP: ${userVocabXP} XP<br>🏆 Trophäen: ${unlockedTrophies.length}`);
             let masterData = JSON.parse(localStorage.getItem("master_learning_stats") || "{}");
             masterData.vokabeln = (masterData.vokabeln || 0) + userVocabXP;
             localStorage.setItem("master_learning_stats", JSON.stringify(masterData));
             return;
         }
-
         let qData = activeQuestions[currentIndex];
         document.getElementById("current-q-num").textContent = currentIndex + 1;
         document.getElementById("total-q-num").textContent = activeQuestions.length;
         document.getElementById("current-cat-display").textContent = qData.cat;
-
         document.getElementById("question-text").textContent = qData.prompt;
-        document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("geo-tip").textContent = "";
-        document.getElementById("geo-feedback").textContent = "";
-
+        document.getElementById("geo-tip").style.display = "none"; document.getElementById("geo-tip").textContent = ""; document.getElementById("geo-feedback").textContent = "";
         if (currentActiveLevel === 1) {
-            document.getElementById("mc-container").style.display = "grid";
-            document.getElementById("input-row").style.display = "none";
-            document.getElementById("check-btn").style.display = "none";
+            document.getElementById("mc-container").style.display = "grid"; document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none";
             renderMultipleChoice(qData);
         } else {
-            document.getElementById("mc-container").style.display = "none";
-            document.getElementById("input-row").style.display = "flex";
-            document.getElementById("check-btn").style.display = "block";
-            document.getElementById("geo-answer").value = "";
-            document.getElementById("geo-answer").focus();
+            document.getElementById("mc-container").style.display = "none"; document.getElementById("input-row").style.display = "flex"; document.getElementById("check-btn").style.display = "block";
+            document.getElementById("geo-answer").value = ""; document.getElementById("geo-answer").focus();
         }
     }
-
     function showEndScreen(titleText) {
-        document.getElementById("geo-question").style.display = "none";
-        document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("input-row").style.display = "none";
-        document.getElementById("check-btn").style.display = "none";
-        document.getElementById("next-btn").style.display = "none";
-        document.getElementById("mc-container").style.display = "none";
-        document.getElementById("stats-bar").style.display = "none";
-        
-        let container = document.querySelector(".container");
-        let endMsg = document.createElement("div");
+        document.getElementById("geo-question").style.display = "none"; document.getElementById("geo-tip").style.display = "none"; document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none"; document.getElementById("next-btn").style.display = "none"; document.getElementById("mc-container").style.display = "none"; document.getElementById("stats-bar").style.display = "none";
+        let container = document.querySelector(".container"), endMsg = document.createElement("div");
         endMsg.innerHTML = `<h2>${titleText}</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄</button>`;
         container.appendChild(endMsg);
     }
-
-    function endSessionEarly() {
-        if (confirm("Runde wirklich vorzeitig beenden?")) {
-            showEndScreen("☠️ Runde vorzeitig beendet!");
-        }
-    }
-
+    function endSessionEarly() { if (confirm("Runde wirklich vorzeitig beenden?")) showEndScreen("☠️ Runde vorzeitig beendet!"); }
     function showNextTip() {
-        let qData = activeQuestions[currentIndex];
-        let tipBox = document.getElementById("geo-tip");
+        let qData = activeQuestions[currentIndex], tipBox = document.getElementById("geo-tip");
         if (!qData.tipPool) return;
-        tipBox.style.display = "block";
-        tipBox.textContent = `💡 Tipp: ${qData.tipPool[qData.tipIndex]}`;
+        tipBox.style.display = "block"; tipBox.textContent = `💡 Tipp: ${qData.tipPool[qData.tipIndex]}`;
         qData.tipIndex = (qData.tipIndex + 1) % qData.tipPool.length;
     }
-
     function renderMultipleChoice(qData) {
-        const mcContainer = document.getElementById("mc-container");
-        mcContainer.innerHTML = "";
-
+        const mcContainer = document.getElementById("mc-container"); mcContainer.innerHTML = "";
         let options = [qData.answer];
         while (options.length < 4) {
             let rndItem = vokabelDatenbank[Math.floor(Math.random() * vokabelDatenbank.length)];
@@ -353,99 +188,51 @@
             if (!options.includes(val)) options.push(val);
         }
         options.sort(() => Math.random() - 0.5);
-
         options.forEach(opt => {
-            let btn = document.createElement("button");
-            btn.className = "mc-btn";
-            btn.textContent = opt;
-            btn.onclick = () => checkAnswer(opt);
+            let btn = document.createElement("button"); btn.className = "mc-btn"; btn.textContent = opt; btn.onclick = () => checkAnswer(opt);
             mcContainer.appendChild(btn);
         });
     }
-
     function normalizeStr(str) {
-        return str.toLowerCase()
-            .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
-            .replace(/é/g, 'e').replace(/è/g, 'e').replace(/ê/g, 'e').replace(/ë/g, 'e')
-            .replace(/à/g, 'a').replace(/â/g, 'a')
-            .replace(/î/g, 'i').replace(/ï/g, 'i')
-            .replace(/ô/g, 'o')
-            .replace(/ù/g, 'u').replace(/û/g, 'u')
-            .replace(/ç/g, 'c')
-            .replace(/ß/g, 'ss')
-            .trim();
+        return str.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/é/g, 'e').replace(/è/g, 'e').replace(/ê/g, 'e').replace(/ë/g, 'e').replace(/à/g, 'a').replace(/â/g, 'a').replace(/î/g, 'i').replace(/ï/g, 'i').replace(/ô/g, 'o').replace(/ù/g, 'u').replace(/û/g, 'u').replace(/ç/g, 'c').replace(/ß/g, 'ss').trim();
     }
-
     function levenshtein(a, b) {
-        if (a.length === 0) return b.length;
-        if (b.length === 0) return a.length;
-        let matrix = [];
-        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+        if (a.length === 0) return b.length; if (b.length === 0) return a.length;
+        let matrix = []; for (let i = 0; i <= b.length; i++) matrix[i] = [i]; for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
         for (let i = 1; i <= b.length; i++) {
             for (let j = 1; j <= a.length; j++) {
-                if (b.charAt(i-1) === a.charAt(j-1)) {
-                    matrix[i][j] = matrix[i-1][j-1];
-                } else {
-                    matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1));
-                }
+                matrix[i][j] = b.charAt(i-1) === a.charAt(j-1) ? matrix[i-1][j-1] : Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1));
             }
         }
         return matrix[b.length][a.length];
     }
-
     function isSimilarEnough(userStr, targetStr) {
-        let u = normalizeStr(userStr);
-        let t = normalizeStr(targetStr);
-        if (u === t) return true;
-        let len = t.length;
-        if (len === 0) return false;
-        let dist = levenshtein(u, t);
-        let similarity = (len - dist) / len;
-        
-        let threshold = (len <= 4) ? 0.30 : 0.50;
-        return similarity >= threshold;
+        let u = normalizeStr(userStr), t = normalizeStr(targetStr);
+        if (u === t) return true; let len = t.length; if (len === 0) return false;
+        let dist = levenshtein(u, t), similarity = (len - dist) / len;
+        return similarity >= (len <= 4 ? 0.30 : 0.50);
     }
-
     function checkAnswer(selectedOpt = null) {
         if (awaitingNext) return;
-        let qData = activeQuestions[currentIndex];
-        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
-
-        if (!sessionStats[qData.cat]) sessionStats[qData.cat] = { total: 0, correct: 0 };
+        let qData = activeQuestions[currentIndex], userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
+        if (!sessionStats[qData.cat]) sessionStats[qData.cat] = {total: 0, correct: 0};
         sessionStats[qData.cat].total++;
-
         let allValidAnswers = [qData.answer, ...(qData.synonyms || [])];
         let isCorrect = allValidAnswers.some(ans => isSimilarEnough(userAnswer, ans));
-
-        document.getElementById("input-row").style.display = "none";
-        document.getElementById("check-btn").style.display = "none";
-        document.getElementById("mc-container").style.display = "none";
-
+        document.getElementById("input-row").style.display = "none"; document.getElementById("check-btn").style.display = "none"; document.getElementById("mc-container").style.display = "none";
         if (isCorrect) {
             sessionStats[qData.cat].correct++;
-            
             let xpGained = (currentActiveLevel === 3) ? 2 : 1;
-            userVocabXP += xpGained;
-            localStorage.setItem("vokabel_user_xp", userVocabXP);
-
-            let totalCorrectSoFar = Object.values(sessionStats).reduce((sum, c) => sum + c.correct, 0);
-            checkTrophies(totalCorrectSoFar);
+            userVocabXP += xpGained; localStorage.setItem("vokabel_user_xp", userVocabXP);
+            checkTrophies(Object.values(sessionStats).reduce((sum, c) => sum + c.correct, 0));
             updateXPDisplay();
-
             document.getElementById("geo-feedback").style.color = "green";
             document.getElementById("geo-feedback").textContent = `Richtig! Super gemacht! +${xpGained} XP 🌟`;
-
-            setTimeout(() => {
-                currentIndex++;
-                loadQuestion();
-            }, 1200);
+            setTimeout(() => { currentIndex++; loadQuestion(); }, 1200);
         } else {
-            roundErrorsCount++; // Fehler zählen für 5 Bonus-XP
-            awaitingNext = true;
+            roundErrorsCount++; awaitingNext = true;
             if (qData.retryCount === 0) {
-                qData.retryCount++;
-                activeQuestions.push(qData);
+                qData.retryCount++; activeQuestions.push(qData);
                 document.getElementById("total-q-num").textContent = activeQuestions.length;
                 document.getElementById("geo-feedback").style.color = "red";
                 document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer} (Die Vokabel kommt am Ende noch einmal!)`;
@@ -456,39 +243,19 @@
             document.getElementById("next-btn").style.display = "block";
         }
     }
-
-    function proceedNext() {
-        currentIndex++;
-        loadQuestion();
-    }
-
+    function proceedNext() { currentIndex++; loadQuestion(); }
     function exportCSVStats() {
         let masterData = JSON.parse(localStorage.getItem("master_learning_stats") || "{}");
         let geoXP = masterData.geografie || parseInt(localStorage.getItem("geo_user_xp") || "0");
         let vocabXP = masterData.vokabeln || parseInt(localStorage.getItem("vokabel_user_xp") || "0");
-        let masterTotal = geoXP + vocabXP;
-
-        let csvContent = "data:text/csv;charset=utf-8,Lernbereich;Gesammelte_XP\n";
-        csvContent += `Nur Geografie;${geoXP}\n`;
-        csvContent += `Nur Vokabeln (Sprachen);${vocabXP}\n`;
-        csvContent += `MASTER GESAMTSUMME (Alle kombiniert);${masterTotal}\n\n`;
-        csvContent += "Detail-Kategorie;Erkannte_Vokabeln;Gesamt_Abfragen;Erkennungsrate\n";
-        
+        let csvContent = "data:text/csv;charset=utf-8,Lernbereich;Gesammelte_XP\nNur Geografie;" + geoXP + "\nNur Vokabeln (Sprachen);"+ vocabXP +"\nMASTER GESAMTSUMME;" + (geoXP + vocabXP) + "\n\nDetail-Kategorie;Erkannte_Vokabeln;Gesamt_Abfragen;Erkennungsrate\n";
         for (let cat in sessionStats) {
-            let s = sessionStats[cat];
-            let rate = s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%";
-            csvContent += `${cat};${s.correct};${s.total};${rate}\n`;
+            let s = sessionStats[cat]; csvContent += `${cat};${s.correct};${s.total};${s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%"}\n`;
         }
-
-        let encodedUri = encodeURI(csvContent);
-        let link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Master_Lernstatistik_Gesamt.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        let encodedUri = encodeURI(csvContent), link = document.createElement("a");
+        link.setAttribute("href", encodedUri); link.setAttribute("download", "Vokabel_Lernstatistik.csv");
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 </script>
-
 </body>
 </html>

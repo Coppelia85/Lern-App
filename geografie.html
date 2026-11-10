@@ -113,7 +113,8 @@
     </div>
 
     <div class="map-wrapper" id="map-wrapper">
-        <img id="geo-map-img" src="europa_karte.png" alt="Stumme Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
+        <!-- Verknüpft mit deinen neuen Karten: Regionen_europa.png (ohne Pins) und regionen_pin_europa.png (mit Pins) -->
+        <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
         <div id="pins-container"></div>
     </div>
 
@@ -188,21 +189,166 @@
 
         let mapImg = document.getElementById("geo-map-img");
         if (currentActiveLevel === 3) {
-            mapImg.src = "europa_karte.png";
+            mapImg.src = "Regionen_europa.png"; // Stumme Karte ohne Pins
             promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
             activePinNr = null;
         } else if (currentActiveLevel === 2) {
-            mapImg.src = "europa_karte_nr.png";
-            mapImg.onerror = function() { this.src = 'europa_karte.png'; };
+            mapImg.src = "regionen_pin_europa.png"; // Karte mit Laser-Pins
             promptText = `Nenne die Hauptstadt von Punkt ${qData.item.nr} (${qData.item.land}).`;
             activePinNr = qData.item.nr;
         } else {
-            mapImg.src = "europa_karte_nr.png";
-            mapImg.onerror = function() { this.src = 'europa_karte.png'; };
+            mapImg.src = "regionen_pin_europa.png";
             promptText = `Nenne die Hauptstadt von ${qData.item.land}.`;
             activePinNr = qData.item.nr;
         }
 
         document.getElementById("geo-question").textContent = promptText;
         document.getElementById("geo-tip").style.display = "none";
-        document.getElementById("geo-feedback").textContent =
+        document.getElementById("geo-feedback").textContent = "";
+
+        renderAllMapPins(currentActiveLevel === 3 ? null : activePinNr);
+
+        if (currentActiveLevel === 1) {
+            document.getElementById("mc-container").style.display = "grid";
+            document.getElementById("geo-answer").style.display = "none";
+            document.getElementById("check-btn").style.display = "none";
+            renderMultipleChoice(qData);
+        } else {
+            document.getElementById("mc-container").style.display = "none";
+            document.getElementById("geo-answer").style.display = "block";
+            document.getElementById("check-btn").style.display = "block";
+            document.getElementById("geo-answer").value = "";
+            document.getElementById("geo-answer").focus();
+        }
+    }
+
+    function renderAllMapPins(activeNr) {
+        const container = document.getElementById("pins-container");
+        container.innerHTML = "";
+
+        europaDatenbank.forEach(item => {
+            if (item.x && item.y) {
+                let pin = document.createElement("div");
+                let isTarget = (item.nr === activeNr);
+                
+                pin.className = `map-pin ${isTarget ? 'highlight' : ''}`;
+                pin.style.left = `${item.x}%`;
+                pin.style.top = `${item.y}%`;
+                
+                let span = document.createElement("span");
+                span.textContent = item.nr;
+                pin.appendChild(span);
+
+                container.appendChild(pin);
+            }
+        });
+    }
+
+    function renderMultipleChoice(qData) {
+        const mcContainer = document.getElementById("mc-container");
+        mcContainer.innerHTML = "";
+
+        let options = [qData.answer];
+        while (options.length < 4) {
+            let randomItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
+            let val = qData.type === "capital" ? randomItem.hauptstadt : randomItem.land;
+            if (!options.includes(val)) options.push(val);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            let btn = document.createElement("button");
+            btn.className = "mc-btn";
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt);
+            mcContainer.appendChild(btn);
+        });
+    }
+
+    function normalizeStr(str) {
+        return str.toLowerCase()
+            .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+            .replace(/é/g, 'e').replace(/í/g, 'i').replace(/á/g, 'a')
+            .replace(/ß/g, 'ss')
+            .trim();
+    }
+
+    function getSimilarity(s1, s2) {
+        let longer = s1;
+        let shorter = s2;
+        if (s1.length < s2.length) {
+            longer = s2;
+            shorter = s1;
+        }
+        let longerLength = longer.length;
+        if (longerLength === 0) return 1.0;
+        return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+    }
+
+    function editDistance(s1, s2) {
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+        let costs = new Array();
+        for (let i = 0; i <= s1.length; i++) {
+            let lastValue = i;
+            for (let j = 0; j <= s2.length; j++) {
+                if (i === 0) {
+                    costs[j] = j;
+                } else {
+                    if (j > 0) {
+                        let newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        }
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+            }
+            if (i > 0) {
+                costs[s2.length] = lastValue;
+            }
+        }
+        return costs[s2.length];
+    }
+
+    function checkAnswer(selectedOpt = null) {
+        let qData = activeQuestions[currentIndex];
+        let userAnswer = selectedOpt !== null ? selectedOpt : document.getElementById("geo-answer").value;
+        
+        let normUser = normalizeStr(userAnswer);
+        let normCorrect = normalizeStr(qData.answer);
+
+        let similarity = getSimilarity(normUser, normCorrect);
+        // 70% Toleranz für die Klassenarbeit (LRS & Tippfehlerschutz)
+        let isCorrect = (normUser === normCorrect || similarity >= 0.7);
+
+        if (isCorrect) {
+            document.getElementById("geo-feedback").style.color = "green";
+            document.getElementById("geo-feedback").textContent = "Richtig! Super gemacht! 🌟";
+
+            let user = localStorage.getItem("activeUser") || "Gast";
+            let count = parseInt(localStorage.getItem(`stats_geo_${user}`) || 0) + 1;
+            localStorage.setItem(`stats_geo_${user}`, count);
+
+            if (selectedLevelSetting === "adaptive" && currentActiveLevel < 3) {
+                currentActiveLevel++;
+            }
+
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 1200);
+        } else {
+            document.getElementById("geo-feedback").style.color = "red";
+            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${qData.answer}`;
+            
+            if (selectedLevelSetting === "adaptive") {
+                currentActiveLevel = Math.max(1, currentActiveLevel - 1);
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

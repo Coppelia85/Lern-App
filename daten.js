@@ -127,7 +127,7 @@ const nachlaenderDatenbank = [
 const halbinselnDatenbank = [
     { id: "H1", name: "Iberische Halbinsel", laender: ["Spanien", "Portugal", "Andorra"] },
     { id: "H2", name: "Apenninhalbinsel", laender: ["Italien", "Vatikanstadt", "San Marino"] },
-    { id: "H3", name: "Skandinavische Halbinsel", laender: ["Norwegen", "Schweden", "Finnland zum Teil"] },
+    { id: "H3", name: "Skandinavische Halbinsel", laender: ["Norwegen", "Schweden", "Finnland", info: "nur zum Teil"] },
     { id: "H4", name: "Balkanhalbinsel", laender: ["Griechenland", "Albanien", "Bulgarien", "Nordmazedonien", "Montenegro", "Bosnien und Herzegowina", "Serbien", "Kosovo", "Kroatien zum Teil", "Türkei zum Teil"] }
 ];
 

@@ -44,6 +44,7 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
             z-index: 20;
         }
+        .map-skull-btn:hover { transform: translate(-50%, -50%) scale(1.2); background: #fff5f5; }
 
         .stats-bar { font-size: 0.9rem; color: #4a5568; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; }
         .question-box { background: #fefcbf; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 12px; color: #744210; display: none; }
@@ -56,12 +57,24 @@
             font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
         }
+        .bulb-btn:hover { background: #fffaf0; transform: scale(1.05); }
+
+        .exit-btn {
+            background: white; border: 2px solid #e53e3e; border-radius: 8px; width: 48px; height: 48px;
+            font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
+        }
+        .exit-btn:hover { background: #fff5f5; transform: scale(1.05); }
 
         .mc-grid { display: grid; gap: 8px; margin-bottom: 12px; display: none; }
         .mc-btn { background: white; border: 2px solid #cbd5e0; padding: 10px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 500; text-align: left; }
+        .mc-btn:hover { border-color: #d69e2e; background: #fffaf0; }
 
         .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
+        .action-btn:hover { background: #b7791f; }
         .next-btn { background: #3182ce; display: none; }
+        .next-btn:hover { background: #2b6cb0; }
+
         .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
         
         .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; display: none; }
@@ -89,10 +102,11 @@
             <label>Themenbereich:</label>
             <select id="train-topic">
                 <option value="europa_mix">Städte & Länder</option>
-                <option value="nachlaender">Nachbarländer von Deutschland</option>
+                <option value="nachlaender">Nachbarländer von Deutschland (Ohne Zurücklegen)</option>
                 <option value="fluesse">Flüsse in Europa</option>
                 <option value="gebirge">Gebirge in Europa</option>
                 <option value="meere">Meere & Ozeane</option>
+                <option value="inseln">Inseln & Halbinseln</option>
                 <option value="verdichtung">Verdichtungsräume & Ballungsgebiete</option>
             </select>
         </div>
@@ -108,7 +122,7 @@
 
         <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
 
-        <div class="admin-box" id="chef-admin-box">
+        <div class="admin-box" id="chef-admin-box" style="display:block;">
             <b>🔒 Eltern-Statistik (Chef):</b><br>
             <button onclick="exportCSVStats()" style="margin-top:6px; padding:6px 10px; background:#2b6cb0; color:white; border:none; border-radius:4px; cursor:pointer;">Statistik als Excel/CSV exportieren 📊</button>
         </div>
@@ -121,7 +135,7 @@
 
     <div class="map-wrapper" id="map-wrapper">
         <img id="geo-map-img" src="regionen_pin_europa.png" alt="Europakarte" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Europe_blank_map.png/800px-Europe_blank_map.png'">
-        <button class="map-skull-btn" id="russland-skull" onclick="endSessionEarly()" title="Notaus">☠️</button>
+        <button class="map-skull-btn" id="russland-skull" onclick="endSessionEarly()" title="Geheimes Moskau-Easter-Egg!">☠️</button>
     </div>
 
     <div class="question-box" id="geo-question">
@@ -133,6 +147,7 @@
     <div class="input-row" id="input-row">
         <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
         <button class="bulb-btn" onclick="showNextTip()" title="Tipp anzeigen">💡</button>
+        <button class="exit-btn" onclick="endSessionEarly()" title="Runde vorzeitig beenden">☠️</button>
     </div>
 
     <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
@@ -155,17 +170,9 @@
         "Flüsse": { total: 0, correct: 0 },
         "Gebirge": { total: 0, correct: 0 },
         "Meere": { total: 0, correct: 0 },
+        "Inseln & Halbinseln": { total: 0, correct: 0 },
         "Verdichtungsräume": { total: 0, correct: 0 }
     };
-
-    window.addEventListener("DOMContentLoaded", () => {
-        let activeUser = localStorage.getItem("activeUser");
-        if (activeUser && typeof userConfig !== 'undefined' && userConfig[activeUser]) {
-            if (userConfig[activeUser].rolle === "Chef") {
-                document.getElementById("chef-admin-box").style.display = "block";
-            }
-        }
-    });
 
     function startTraining() {
         currentActiveLevel = parseInt(document.getElementById("difficulty-level").value);
@@ -179,42 +186,72 @@
                 let r = Math.random();
                 let subType = r < 0.35 ? "cap_from_country" : (r < 0.7 ? "country_from_cap" : (r < 0.85 ? "find_number" : "true_false"));
                 
+                // Erweiterte Synonym-Erkennung für Chisinau/Kischinau, Moldawien etc.
+                let customSynsHauptstadt = [...(item.synonymeHauptstadt || [])];
+                let customSynsLand = [...(item.synonymeLand || [])];
+                if (item.hauptstadt.toLowerCase().includes("chisinau")) customSynsHauptstadt.push("kischinau", "kinsinau");
+                if (item.land.toLowerCase().includes("moldau")) customSynsLand.push("moldawien", "republik moldau");
+
                 if (subType === "cap_from_country") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, item: item, mode: "capital" });
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, synonyms: customSynsHauptstadt, item: item, mode: "capital", useCleanMap: false });
                 } else if (subType === "country_from_cap") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, item: item, mode: "country" });
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Von welchem Land ist ${item.hauptstadt} die Hauptstadt?`, answer: item.land, synonyms: customSynsLand, item: item, mode: "country", useCleanMap: false });
                 } else if (subType === "find_number") {
-                    generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), item: item, mode: "number" });
+                    generatedPool.push({ cat: "Städte & Länder", prompt: `Suche ${item.land} auf der Karte, welche Nummer trägt es?`, answer: item.nr.toString(), synonyms: [], item: item, mode: "number", useCleanMap: false });
                 } else {
                     let randomOther = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
                     let testCap = randomOther.hauptstadt;
                     
                     if (testCap === item.hauptstadt) {
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}?`, answer: "ja", item: item, mode: "tf" });
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}?`, answer: "ja", synonyms: ["stimmt", "richtig"], item: item, mode: "tf", useCleanMap: false });
                     } else {
-                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Antworte mit Nein und nenne die richtige.`, answer: item.hauptstadt, item: item, mode: "capital" });
+                        generatedPool.push({ cat: "Städte & Länder", prompt: `Ist ${testCap} die Hauptstadt von ${item.land}? Falls nein: Antworte mit Nein und nenne die richtige.`, answer: item.hauptstadt, synonyms: customSynsHauptstadt, item: item, mode: "capital", useCleanMap: false });
                     }
                 }
             });
         } else if (topicKey === "nachlaender") {
             nachlaenderDatenbank.forEach(n => {
-                generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, item: { land: n.land, tipp: "Grenzt direkt an Deutschland" }, mode: "country" });
+                generatedPool.push({ cat: "Nachbarländer", prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, synonyms: n.synonyme || [], item: { land: n.land, tipp: "Grenzt direkt an Deutschland" }, mode: "country", useCleanMap: false });
             });
         } else if (topicKey === "fluesse") {
             fluesseDatenbank.forEach(f => {
-                generatedPool.push({ cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, item: { land: f.name, tipp: f.info }, mode: "river" });
+                let syns = [...(f.synonyme || [])];
+                if (f.name.toLowerCase().includes("donau")) syns.push("donau");
+                generatedPool.push({ cat: "Flüsse", prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, synonyms: syns, item: { land: f.name, tipp: f.info }, mode: "river", useCleanMap: true });
             });
         } else if (topicKey === "gebirge") {
             gebirgeDatenbank.forEach(g => {
-                generatedPool.push({ cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, item: { land: g.name, tipp: "Länder: " + g.laender.join(", ") }, mode: "mountain" });
+                generatedPool.push({ cat: "Gebirge", prompt: `Welches Gebirge liegt unter anderem in ${g.laender[0]}?`, answer: g.name, synonyms: g.synonyme || [], item: { land: g.name, tipp: "Länder: " + g.laender.join(", ") }, mode: "mountain", useCleanMap: true, targetCountry: g.laender[0] });
             });
         } else if (topicKey === "meere") {
             meereDatenbank.forEach(m => {
-                generatedPool.push({ cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, item: { land: m.name, tipp: "Gewässer in Europa" }, mode: "sea" });
+                let syns = [...(m.synonyme || [])];
+                if (m.name.toLowerCase().includes("atlantischer ozean")) syns.push("atlantik");
+                if (m.name.toLowerCase().includes("mittelmeer")) syns.push("mittelmeer");
+                generatedPool.push({ cat: "Meere", prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, synonyms: syns, item: { land: m.name, tipp: "Gewässer in Europa" }, mode: "sea", useCleanMap: true });
             });
+        } else if (topicKey === "inseln") {
+            if (typeof inselnDatenbank !== 'undefined') {
+                inselnDatenbank.forEach(i => {
+                    generatedPool.push({ cat: "Inseln & Halbinseln", prompt: `Welche Insel / Halbinsel ist hier bzw. gehört zu ${i.bezug || 'Europa'}?`, answer: i.name, synonyms: i.synonyme || [], item: { land: i.name, tipp: i.tipp || "Insel oder Halbinsel in Europa" }, mode: "island", useCleanMap: true });
+                });
+            }
         } else if (topicKey === "verdichtung") {
-            verdichtungsraeumeDatenbank.forEach(v => {
-                generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Ballungsraum gehört zu Städten wie ${v.städte[0]}?`, answer: v.name, item: { land: v.name, tipp: "Wirtschafts- und Ballungsraum in " + v.land }, mode: "area" });
+            let baseVerdichtung = (typeof verdichtungsraeumeDatenbank !== 'undefined') ? verdichtungsraeumeDatenbank : [
+                { name: "Rhein-Ruhr", städte: ["Köln", "Düsseldorf", "Essen"], land: "Deutschland" },
+                { name: "Rhein-Main", städte: ["Frankfurt", "Wiesbaden", "Mainz"], land: "Deutschland" },
+                { name: "Berlin", städte: ["Berlin"], land: "Deutschland" },
+                { name: "Hamburg", städte: ["Hamburg"], land: "Deutschland" },
+                { name: "Stuttgart", städte: ["Stuttgart"], land: "Deutschland" },
+                { name: "München", städte: ["München"], land: "Deutschland" },
+                { name: "London", städte: ["London"], land: "Großbritannien" },
+                { name: "Paris", städte: ["Paris"], land: "Frankreich" },
+                { name: "Mailand", städte: ["Mailand"], land: "Italien" },
+                { name: "Randstad", städte: ["Amsterdam", "Rotterdam", "Den Haag"], land: "Niederlande" }
+            ];
+            
+            baseVerdichtung.forEach(v => {
+                generatedPool.push({ cat: "Verdichtungsräume", prompt: `Welcher Verdichtungsraum / Ballungsraum hat wichtige Städte wie ${v.städte[0]}?`, answer: v.name, synonyms: v.synonyme || [], item: { land: v.name, tipp: "Wirtschaftsraum mit Großstädten" }, mode: "area", useCleanMap: true });
             });
         }
 
@@ -246,7 +283,8 @@
         document.getElementById("check-btn").style.display = "block";
 
         let skullBtn = document.getElementById("russland-skull");
-        skullBtn.style.display = (Math.random() * 100 <= 4.2) ? "flex" : "none";
+        let isMoscowSkull = Math.random() * 100 <= 4.2;
+        skullBtn.style.display = isMoscowSkull ? "flex" : "none";
 
         if (currentIndex >= activeQuestions.length) {
             showEndScreen("🎉 Richtig stark! Du hast diese Prüfungsrunde abgeschlossen!");
@@ -259,7 +297,11 @@
         document.getElementById("current-cat-display").textContent = qData.cat;
 
         let mapImg = document.getElementById("geo-map-img");
-        mapImg.src = (currentActiveLevel === 3) ? "Regionen_europa.png" : "regionen_pin_europa.png";
+        if (qData.useCleanMap || currentActiveLevel === 3) {
+            mapImg.src = "europa_karte.png";
+        } else {
+            mapImg.src = "regionen_pin_europa.png";
+        }
 
         document.getElementById("question-text").textContent = qData.prompt;
         document.getElementById("geo-tip").style.display = "none";
@@ -298,7 +340,7 @@
 
     function endSessionEarly() {
         if (confirm("Runde wirklich vorzeitig beenden?")) {
-            showEndScreen("☠️ Runde vorzeitig beendet über das 4,2%-Russland-Easter-Egg!");
+            showEndScreen("☠️ Runde vorzeitig beendet!");
         }
     }
 
@@ -318,18 +360,11 @@
         let options = [qData.answer];
         while (options.length < 4) {
             let rndItem = europaDatenbank[Math.floor(Math.random() * europaDatenbank.length)];
-            let val = "";
+            let val = rndItem.hauptstadt;
+            if (qData.mode === "number") val = rndItem.nr.toString();
+            if (qData.mode === "country") val = rndItem.land;
+            if (qData.mode === "tf") val = Math.random() > 0.5 ? "ja" : "nein";
             
-            if (qData.mode === "number") {
-                val = rndItem.nr.toString();
-            } else if (qData.mode === "country") {
-                val = rndItem.land;
-            } else if (qData.mode === "tf") {
-                val = Math.random() > 0.5 ? "ja" : "nein";
-            } else {
-                val = rndItem.hauptstadt;
-            }
-
             if (!options.includes(val)) options.push(val);
         }
         options.sort(() => Math.random() - 0.5);
@@ -351,6 +386,39 @@
             .trim();
     }
 
+    // Levenshtein-Distanz Algorithmus für LRS-Unterstützung (Toleranz bei Tippfehlern)
+    function levenshtein(a, b) {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        let matrix = [];
+        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i-1) === a.charAt(j-1)) {
+                    matrix[i][j] = matrix[i-1][j-1];
+                } else {
+                    matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1));
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    function isSimilarEnough(userStr, targetStr) {
+        let u = normalizeStr(userStr);
+        let t = normalizeStr(targetStr);
+        if (u === t) return true;
+        let len = t.length;
+        if (len === 0) return false;
+        let dist = levenshtein(u, t);
+        let similarity = (len - dist) / len; // Dezimalwert der Übereinstimmung (z.B. 0.6 = 60%)
+        
+        // Regel für LRS: 3-4 Buchstaben = 30% Toleranz (0.3), längere Wörter = 50% Toleranz (0.5)
+        let threshold = (len <= 4) ? 0.30 : 0.50;
+        return similarity >= threshold;
+    }
+
     function checkAnswer(selectedOpt = null) {
         if (awaitingNext) return;
         let qData = activeQuestions[currentIndex];
@@ -369,15 +437,14 @@
         if (!sessionStats[qData.cat]) sessionStats[qData.cat] = { total: 0, correct: 0 };
         sessionStats[qData.cat].total++;
 
-        let normCorrect = normalizeStr(qData.answer);
-        let isCorrect = false;
+        // Prüfen ob Hauptantwort oder Synonyme (inkl. LRS-Ähnlichkeitsprüfung)
+        let allValidAnswers = [qData.answer, ...(qData.synonyms || [])];
+        let isCorrect = allValidAnswers.some(ans => isSimilarEnough(userAnswer, ans));
 
-        let userParts = userAnswer.split(/,|\/|\+|&|\bund\b|\boder\b/i).map(p => normalizeStr(p));
-        if (userParts.some(part => part.length > 0 && normCorrect.includes(part))) {
-            isCorrect = true;
-        }
-        if (normUser === normCorrect) {
-            isCorrect = true;
+        // Echte Mehrfach-Lösung (z.B. Gebirge in Ländern)
+        if (!isCorrect && qData.targetCountry && typeof gebirgeDatenbank !== 'undefined') {
+            let matchingGebirge = gebirgeDatenbank.filter(g => g.laender.includes(qData.targetCountry));
+            isCorrect = matchingGebirge.some(m => isSimilarEnough(userAnswer, m.name));
         }
 
         document.getElementById("input-row").style.display = "none";
@@ -415,12 +482,6 @@
     }
 
     function exportCSVStats() {
-        let pass = prompt("Bitte Eltern-Passwort eingeben (Chef):");
-        if (pass !== "47110815") {
-            alert("Falsches Passwort!");
-            return;
-        }
-
         let csvContent = "data:text/csv;charset=utf-8,Kategorie;Erkannte_Fragen;Gesamt_Fragen;Erkennungsrate\n";
         for (let cat in sessionStats) {
             let s = sessionStats[cat];
@@ -436,10 +497,6 @@
         link.click();
         document.body.removeChild(link);
     }
-
-    window.addEventListener("beforeunload", function (e) {
-        console.log("Sitzung beendet - Statistik aktualisiert.");
-    });
 </script>
 
 </body>

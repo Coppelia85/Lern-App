@@ -1,4 +1,4 @@
-// --- Globale Benutzerverwaltung für die Chef-Statistik ---
+// --- Globale Benutzerverwaltung (Zentrale Datenbasis) ---
 const userConfig = {
     "King Knulwes": { passwort: "None", rolle: "Kind" },
     "Mini 14": { passwort: "None", rolle: "Kind" },
@@ -51,8 +51,8 @@ const nachlaenderDatenbank = [
 
 // --- Flüsse ---
 const fluesseDatenbank = [
-    { name: "Rhein", route: "Fließet von den Alpen durch Deutschland und die Niederlande in die Nordsee", info: "Wichtigster Handelsfluss in Mitteleuropa", synonyme: ["rhein"] },
-    { name: "Donau", route: "Fließt vom Schwarzwald nach Osten durch das schwarze Meer", info: "Zweit längster Fluss Europas", synonyme: ["donau"] },
+    { name: "Rhein", route: "Fließt von den Alpen durch Deutschland und die Niederlande in die Nordsee", info: "Wichtigster Handelsfluss in Mitteleuropa", synonyme: ["rhein"] },
+    { name: "Donau", route: "Fließt vom Schwarzwald nach Osten zum Schwarzen Meer", info: "Zweitlängster Fluss Europas", synonyme: ["donau"] },
     { name: "Wolga", route: "Längster Fluss Europas, fließt durch Russland ins Kaspische Meer", info: "Mütterchen Wolga", synonyme: ["wolga"] },
     { name: "Elbe", route: "Fließt von Tschechien durch Deutschland in die Nordsee (Hamburg)", info: "Mündet bei Cuxhaven", synonyme: ["elbe"] },
     { name: "Seine", route: "Fließt durch Paris in den Atlantik / Ärmelkanal", info: "Der Fluss der französischen Hauptstadt", synonyme: ["seine"] }

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabel- & Sprachen-Trainer</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .container { background: white; width: 100%; max-width: 750px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
+        h1 { color: #3182ce; margin-top: 5px; font-size: 1.3rem; }
+        
+        .setup-box { background: #ebf8ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
+        .setup-group { margin-bottom: 10px; }
+        label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; color: #2b6cb0; }
+        select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; background: white; }
+
+        .stats-bar { font-size: 0.85rem; color: #4a5568; margin-bottom: 12px; font-weight: bold; display: flex; justify-content: space-between; background: #edf2f7; padding: 6px 10px; border-radius: 6px; flex-wrap: wrap; gap: 4px; }
+        .question-box { background: #ebf8ff; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: #2b6cb0; display: none; }
+        
+        .input-row { display: none; gap: 8px; margin-bottom: 10px; align-items: center; }
+        input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; box-sizing: border-box; }
+        
+        .exit-btn {
+            background: white; border: 2px solid #e53e3e; border-radius: 8px; width: 48px; height: 48px;
+            font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;
+        }
+        .exit-btn:hover { background: #fff5f5; transform: scale(1.05); }
+
+        .action-btn { background: #3182ce; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
+        .action-btn:hover { background: #2b6cb0; }
+        .next-btn { display: none; }
+
+        .admin-box { background: #edf2f7; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; text-align: left; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="text-align: left;"><a href="index.html">⬅ Zurück zum Menü</a></div>
+    <h1>🗣️ Vokabel- & Sprachen-Trainer</h1>
+
+    <div id="setup-screen" class="setup-box">
+        <h3>Vokabel-Training konfigurieren:</h3>
+        
+        <div class="setup-group">
+            <label>Sprache & Themenbereich:</label>
+            <select id="train-topic">
+                <option value="französisch_gesamt">Französisch (Gesamt / Alle Unités)</option>
+                <option value="englisch_gesamt">Englisch (Gesamt / Alle Units)</option>
+            </select>
+        </div>
+
+        <div class="setup-group">
+            <label>Anzahl der Vokabeln:</label>
+            <select id="question-limit">
+                <option value="5">5 Vokabeln</option>
+                <option value="10" selected>10 Vokabeln</option>
+                <option value="all">Alle verfügbaren</option>
+            </select>
+        </div>
+
+        <button class="action-btn" onclick="startTraining()">Vokabeln starten 🚀</button>
+
+        <div class="admin-box">
+            <b>🔒 Vokabel-Statistik (Chef):</b><br>
+            <button onclick="exportVocabCSV()" style="margin-top:6px; padding:6px 10px; background:#3182ce; color:white; border:none; border-radius:4px; cursor:pointer;">Vokabel-Statistik exportieren 📊</button>
+        </div>
+    </div>
+
+    <div class="stats-bar" id="stats-bar" style="display: none;">
+        <span>Vokabel <span id="current-q-num">1</span>/<span id="total-q-num">0</span></span>
+        <span>⚡ XP: <span id="user-xp">0</span></span>
+    </div>
+
+    <div class="question-box" id="geo-question">
+        <span id="question-text">Fragetext</span>
+    </div>
+
+    <div class="input-row" id="input-row">
+        <input type="text" id="vocab-answer" placeholder="Übersetzung eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+        <button class="exit-btn" onclick="endSessionEarly()" title="Runde vorzeitig beenden">☠️</button>
+    </div>
+
+    <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
+    <button class="action-btn next-btn" id="next-btn" onclick="proceedNext()">Weiter zum nächsten Wort ➡️</button>
+
+    <p id="geo-feedback" style="font-weight: bold; margin-top: 10px;"></p>
+</div>
+
+<!-- Verknüpfung zur Vokabel-Datenbank -->
+<script src="vokabeln_daten.js"></script>
+<script>
+    let activeVocabs = [];
+    let currentIndex = 0;
+    let awaitingNext = false;
+    let vocabXP = parseInt(localStorage.getItem("vokabel_user_xp") || "0");
+
+    let sessionVocabStats = {
+        "Französisch": { total: 0, correct: 0 },
+        "Englisch": { total: 0, correct: 0 }
+    };
+
+    function updateXPDisplay() {
+        document.getElementById("user-xp").textContent = vocabXP;
+    }
+
+    function startTraining() {
+        let topicKey = document.getElementById("train-topic").value;
+        let limitVal = document.getElementById("question-limit").value;
+
+        let pool = [];
+        if (typeof vokabelDatenbank !== 'undefined') {
+            pool = vokabelDatenbank.filter(v => {
+                if (topicKey === "französisch_gesamt") return v.sprache === "Französisch";
+                if (topicKey === "englisch_gesamt") return v.sprache === "Englisch";
+                return true;
+            });
+        }
+
+        pool.sort(() => Math.random() - 0.5);
+        let limit = limitVal === "all" ? pool.length : parseInt(limitVal);
+        activeVocabs = pool.slice(0, Math.min(limit, pool.length));
+
+        if (activeVocabs.length === 0) {
+            alert("Keine Vokabeln für diesen Bereich gefunden! Bitte prüfe die vokabeln_daten.js.");
+            return;
+        }
+
+        updateXPDisplay();
+        document.getElementById("setup-screen").style.display = "none";
+        document.getElementById("stats-bar").style.display = "flex";
+        document.getElementById("geo-question").style.display = "block";
+
+        currentIndex = 0;
+        awaitingNext = false;
+        loadVocab();
+    }
+
+    function loadVocab() {
+        awaitingNext = false;
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("check-btn").style.display = "block";
+        document.getElementById("input-row").style.display = "flex";
+
+        if (currentIndex >= activeVocabs.length) {
+            showEndScreen(`🎉 Super gemacht! Vokabel-Runde beendet!<br><br>⚡ Vokabel-XP: ${vocabXP} XP`);
+            return;
+        }
+
+        let vData = activeVocabs[currentIndex];
+        document.getElementById("question-text").textContent = `Übersetze (${vData.sprache}): ${vData.frage}`;
+        document.getElementById("current-q-num").textContent = currentIndex + 1;
+        document.getElementById("total-q-num").textContent = activeVocabs.length;
+
+        document.getElementById("geo-feedback").textContent = "";
+        let ansField = document.getElementById("vocab-answer");
+        ansField.value = "";
+        ansField.focus();
+    }
+
+    function checkAnswer() {
+        if (awaitingNext) return;
+        let vData = activeVocabs[currentIndex];
+        let userAnswer = document.getElementById("vocab-answer").value.trim().toLowerCase();
+        let correctAnswer = vData.antwort.trim().toLowerCase();
+
+        if (!sessionVocabStats[vData.sprache]) sessionVocabStats[vData.sprache] = { total: 0, correct: 0 };
+        sessionVocabStats[vData.sprache].total++;
+
+        document.getElementById("input-row").style.display = "none";
+        document.getElementById("check-btn").style.display = "none";
+
+        if (userAnswer === correctAnswer || (vData.synonyme && vData.synonyme.map(s => s.toLowerCase()).includes(userAnswer))) {
+            sessionVocabStats[vData.sprache].correct++;
+            vocabXP += 1;
+            localStorage.setItem("vokabel_user_xp", vocabXP);
+            updateXPDisplay();
+
+            document.getElementById("geo-feedback").style.color = "green";
+            document.getElementById("geo-feedback").textContent = "Richtig! +1 XP 🌟";
+
+            setTimeout(() => {
+                currentIndex++;
+                loadVocab();
+            }, 1000);
+        } else {
+            awaitingNext = true;
+            document.getElementById("geo-feedback").style.color = "red";
+            document.getElementById("geo-feedback").textContent = `Leider falsch. Richtig wäre: ${vData.antwort}`;
+            document.getElementById("next-btn").style.display = "block";
+        }
+    }
+
+    function proceedNext() {
+        currentIndex++;
+        loadVocab();
+    }
+
+    function endSessionEarly() {
+        if (confirm("Runde wirklich vorzeitig beenden?")) {
+            showEndScreen("☠️ Runde vorzeitig beendet!");
+        }
+    }
+
+    function showEndScreen(titleText) {
+        document.getElementById("geo-question").style.display = "none";
+        document.getElementById("input-row").style.display = "none";
+        document.getElementById("check-btn").style.display = "none";
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("stats-bar").style.display = "none";
+        
+        let container = document.querySelector(".container");
+        let endMsg = document.createElement("div");
+        endMsg.innerHTML = `<h2>${titleText}</h2><button class='action-btn' onclick='location.reload()'>Neue Runde starten 🔄</button>`;
+        container.appendChild(endMsg);
+    }
+
+    function exportVocabCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,Lern-App Chef-Statistik (Vokabeln)\n";
+        csvContent += "Sprache;Richtig;Gesamt;Erkennungsrate\n";
+        
+        for (let sprache in sessionVocabStats) {
+            let s = sessionVocabStats[sprache];
+            let rate = s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "0%";
+            csvContent += `${sprache};${s.correct};${s.total};${rate}\n`;
+        }
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Vokabel_Chef_Statistik.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>

@@ -8,8 +8,12 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
         h1 { color: #2b6cb0; margin-top: 5px; font-size: 1.6rem; }
-        p { color: #4a5568; font-size: 0.95rem; margin-bottom: 25px; }
+        p { color: #4a5568; font-size: 0.95rem; margin-bottom: 20px; }
         
+        .user-box { background: #edf2f7; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
+        .user-box label { display: block; font-weight: bold; margin-bottom: 6px; color: #2d3748; font-size: 0.9rem; }
+        .user-box select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; background: white; box-sizing: border-box; }
+
         .menu-grid { display: grid; gap: 15px; }
         .menu-card {
             background: #ebf8ff; border: 2px solid #3182ce; padding: 20px; border-radius: 12px;
@@ -27,7 +31,15 @@
 
 <div class="container">
     <h1>🚀 Lern-App Zentrale</h1>
-    <p>Wähle deinen Trainingsbereich aus:</p>
+    <p>Willkommen! Wer trainiert heute?</p>
+
+    <!-- Benutzerverwaltung / Profil-Auswahl -->
+    <div class="user-box">
+        <label for="current-user-select">Aktuelles Profil:</label>
+        <select id="current-user-select" onchange="changeUser()">
+            <!-- Wird per Script gefüllt -->
+        </select>
+    </div>
 
     <div class="menu-grid">
         <a href="geografie.html" class="menu-card geo-card">
@@ -39,6 +51,40 @@
         </a>
     </div>
 </div>
+
+<script>
+    // Globale Benutzerkonfiguration in der Zentrale
+    const userConfig = {
+        "King Knulwes": { passwort: "None", rolle: "Kind" },
+        "Mini 14": { passwort: "None", rolle: "Kind" },
+        "Queen Katherine": { passwort: "None", rolle: "Kind" },
+        "Chef": { passwort: "None", rolle: "Chef" }
+    };
+
+    function initUserSelect() {
+        let select = document.getElementById("current-user-select");
+        select.innerHTML = "";
+        let savedUser = localStorage.getItem("active_learning_user") || "King Knulwes";
+
+        for (let username in userConfig) {
+            let opt = document.createElement("option");
+            opt.value = username;
+            opt.textContent = username + (userConfig[username].rolle === "Chef" ? " 👑 (Chef)" : " 🌟");
+            if (username === savedUser) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        }
+    }
+
+    function changeUser() {
+        let select = document.getElementById("current-user-select");
+        localStorage.setItem("active_learning_user", select.value);
+    }
+
+    // Beim Laden der Seite ausführen
+    initUserSelect();
+</script>
 
 </body>
 </html>

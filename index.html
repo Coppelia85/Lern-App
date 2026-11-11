@@ -5,133 +5,179 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lern-App Zentrale</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; box-sizing: border-box; }
-        h1 { color: #2b6cb0; margin-top: 5px; font-size: 1.6rem; }
-        p { color: #4a5568; font-size: 0.95rem; margin-bottom: 20px; }
-        
-        .user-box { background: #edf2f7; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
-        .user-box label { display: block; font-weight: bold; margin-bottom: 6px; color: #2d3748; font-size: 0.9rem; }
-        .user-box select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; background: white; box-sizing: border-box; }
-
-        .menu-grid { display: grid; gap: 15px; }
-        .menu-card {
-            background: #ebf8ff; border: 2px solid #3182ce; padding: 20px; border-radius: 12px;
-            text-decoration: none; color: #2b6cb0; font-weight: bold; font-size: 1.1rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7fafc;
+            color: #2d3748;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        .menu-card:hover { background: #bee3f8; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
-        .geo-card { background: #fffaf0; border-color: #d69e2e; color: #744210; }
-        .geo-card:hover { background: #feebc8; }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 {
+            color: #2b6cb0;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 25px;
+        }
+        .profile-box {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .profile-box label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+        .profile-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+            font-size: 1rem;
+            background: white;
+        }
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #3182ce;
+            background: white;
+            color: #3182ce;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        .menu-btn:hover {
+            background: #3182ce;
+            color: white;
+        }
+        /* Chef-Statistik Box */
+        #chef-stats-section {
+            margin-top: 25px;
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+            text-align: left;
+        }
+        #chef-stats-section h3 {
+            color: #c53030;
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+        .stat-item {
+            background: white;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #feb2b2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🚀 Lern-App Zentrale</h1>
-    <p>Willkommen! Wer trainiert heute?</p>
+    <div class="container">
+        <h1>🚀 Lern-App Zentrale</h1>
+        <div class="subtitle">Willkommen! Wer trainiert heute?</div>
 
-    <!-- Benutzerverwaltung / Profil-Auswahl -->
-    <div class="user-box">
-        <label for="current-user-select">Aktuelles Profil:</label>
-        <select id="current-user-select" onchange="changeUser()">
-            <!-- Wird per Script gefüllt -->
-        </select>
+        <!-- Profil Auswahl -->
+        <div class="profile-box">
+            <label for="current-user-select">Aktuelles Profil:</label>
+            <select id="current-user-select" class="profile-select" onchange="handleUserChange()">
+                <option value="King Knulwes">👑 King Knulwes</option>
+                <option value="Mini 14">👦 Mini 14</option>
+                <option value="Queen Katherine">👸 Queen Katherine</option>
+                <option value="Chef">⭐ Chef (Lehrer/Admin)</option>
+            </select>
+        </div>
+
+        <!-- Navigation zu den Lerneinheiten -->
+        <a href="geografie.html" class="menu-btn">🌍 Europa-Geografie Prüfungstrainer</a>
+        <a href="vokabel.html" class="menu-btn" style="border-color: #4299e1; color: #4299e1;">📖 Vokabel- & Sprachen-Trainer</a>
+
+        <!-- Chef-Statistik & Auswertung (Nur sichtbar bei Profil "Chef") -->
+        <div id="chef-stats-section">
+            <h3>👑 Chef-Statistik & Auswertung</h3>
+            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 10px;">Übersicht der Lernfortschritte aller Profile:</p>
+            <div id="chef-stats-list">
+                <!-- Wird dynamisch gefüllt -->
+            </div>
+        </div>
     </div>
 
-    <div class="menu-grid">
-        <a href="geografie.html" class="menu-card geo-card">
-            🌍 Europa-Geografie Prüfungstrainer
-        </a>
-        
-        <a href="vokabeln.html" class="menu-card">
-            🗣️ Vokabel- & Sprachen-Trainer (Französisch / Englisch)
-        </a>
-    </div>
-</div>
-
-<script>
-    // Globale Benutzerkonfiguration in der Zentrale
-    const userConfig = {
-        "King Knulwes": { passwort: "None", rolle: "Kind" },
-        "Mini 14": { passwort: "None", rolle: "Kind" },
-        "Queen Katherine": { passwort: "None", rolle: "Kind" },
-        "Chef": { passwort: "None", rolle: "Chef" }
-    };
-
-    function initUserSelect() {
-        let select = document.getElementById("current-user-select");
-        select.innerHTML = "";
-        let savedUser = localStorage.getItem("active_learning_user") || "King Knulwes";
-
-        for (let username in userConfig) {
-            let opt = document.createElement("option");
-            opt.value = username;
-            opt.textContent = username + (userConfig[username].rolle === "Chef" ? " 👑 (Chef)" : " 🌟");
-            if (username === savedUser) {
-                opt.selected = true;
-            }
-            select.appendChild(opt);
-        }
-    }
-
-    function changeUser() {
-        let select = document.getElementById("current-user-select");
-        localStorage.setItem("active_learning_user", select.value);
-    }
-
-    // Beim Laden der Seite ausführen
-    initUserSelect();
-</script>
-<!-- Chef-Statistik Bereich (Nur für den Chef sichtbar) -->
-<div id="chef-stats-section" style="margin-top: 25px; background: #fff5f5; border: 2px solid #fc8181; padding: 15px; border-radius: 12px; display: none; text-align: left;">
-    <h3 style="color: #c53030; margin-top: 0; font-size: 1.1rem;">👑 Chef-Statistik & Auswertung</h3>
-    <p style="font-size: 0.85rem; color: #718096; margin-bottom: 10px;">Übersicht der Lernfortschritte aller Profile:</p>
-    
-    <ul id="chef-stats-list" style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #2d3748;">
-        <!-- Wird dynamisch gefüllt -->
-    </ul>
-</div>
-
-<script>
-    // Funktion anpassen, um die Chef-Ansicht einzublenden, wenn "Chef" gewählt ist
-    function checkChefView() {
-        let selectedUser = document.getElementById("current-user-select").value;
-        let chefBox = document.getElementById("chef-stats-section");
-        
-        if (selectedUser === "Chef") {
-            chefBox.style.display = "block";
-            loadChefData();
-        } else {
-            chefBox.style.display = "none";
-        }
-    }
-
-    function loadChefData() {
-        let listEl = document.getElementById("chef-stats-list");
-        listEl.innerHTML = "";
-        
-        // Beispiel-Auswertung aus dem localStorage (XP für Geografie & Vokabeln)
-        let profiles = ["King Knulwes", "Mini 14", "Queen Katherine"];
-        
-        profiles.forEach(profile => {
-            // Hier greifen wir auf die gespeicherten Werte der Profile zu
-            let xpGeo = localStorage.getItem("geo_user_xp_" + profile) || localStorage.getItem("geo_user_xp") || "0";
+    <script>
+        function handleUserChange() {
+            let selectedUser = document.getElementById("current-user-select").value;
+            // Profil im localStorage speichern, damit die Unterseiten wissen, wer eingeloggt ist
+            localStorage.setItem("active_user", selectedUser);
             
-            let li = document.createElement("li");
-            li.style.cssText = "background: white; margin-bottom: 8px; padding: 10px; border-radius: 6px; border: 1px solid #feb2b2; display: flex; justify-content: space-between; align-items: center;";
-            li.innerHTML = `<strong>🌟 ${profile}</strong> <span>Geografie XP: <strong>${xpGeo}</strong></span>`;
-            listEl.appendChild(li);
-        });
-    }
+            let chefBox = document.getElementById("chef-stats-section");
+            
+            if (selectedUser === "Chef") {
+                chefBox.style.display = "block";
+                loadChefData();
+            } else {
+                chefBox.style.display = "none";
+            }
+        }
 
-    // Beim Laden und bei Benutzerwechsel prüfen
-    document.getElementById("current-user-select").addEventListener("change", checkChefView);
-    // Direkt beim Start einmal aufrufen
-    checkChefView();
-</script>
+        function loadChefData() {
+            let listEl = document.getElementById("chef-stats-list");
+            listEl.innerHTML = "";
+            
+            let profiles = ["King Knulwes", "Mini 14", "Queen Katherine"];
+            
+            profiles.forEach(profile => {
+                // XP für das jeweilige Profil auslesen
+                let xpGeo = localStorage.getItem("geo_user_xp_" + profile) || localStorage.getItem("geo_user_xp") || "0";
+                
+                let div = document.createElement("div");
+                div.className = "stat-item";
+                div.innerHTML = `<strong>🌟 ${profile}</strong> <span>Geografie XP: <strong>${xpGeo}</strong></span>`;
+                listEl.appendChild(div);
+            });
+        }
+
+        // Beim Laden der Seite prüfen, ob ein Benutzer vorausgewählt war
+        window.onload = function() {
+            let savedUser = localStorage.getItem("active_user");
+            if (savedUser) {
+                let selectEl = document.getElementById("current-user-select");
+                selectEl.value = savedUser;
+            }
+            handleUserChange();
+        };
+    </script>
 
 </body>
 </html>

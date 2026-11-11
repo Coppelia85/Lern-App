@@ -20,10 +20,7 @@ const europaDatenbank = [
     { nr: 10, land: "Deutschland", hauptstadt: "Berlin", synonymeLand: ["deutschland", "brd"], synonymeHauptstadt: ["berlin"] },
     { nr: 11, land: "Polen", hauptstadt: "Warschau", synonymeLand: ["polen"], synonymeHauptstadt: ["warschau"] },
     { nr: 12, land: "Tschechien", hauptstadt: "Prag", synonymeLand: ["tschechien", "tschechische republik"], synonymeHauptstadt: ["prag"] },
-    { nr: 13, land: "Slowakei", hauptstadt: "Bratislava", synonymeLand: ["slowakei"], synonymeHauptstadt: ["bratislava", "pressburg"] }
-];
-// Fortsetzung Europa Hauptstädte & Länder Datenbank
-const europaDatenbankTeil2 = [
+    { nr: 13, land: "Slowakei", hauptstadt: "Bratislava", synonymeLand: ["slowakei"], synonymeHauptstadt: ["bratislava", "pressburg"] },
     { nr: 14, land: "Ungarn", hauptstadt: "Budapest", synonymeLand: ["ungarn"], synonymeHauptstadt: ["budapest"] },
     { nr: 15, land: "Österreich", hauptstadt: "Wien", synonymeLand: ["österreich"], synonymeHauptstadt: ["wien"] },
     { nr: 16, land: "Schweiz", hauptstadt: "Bern", synonymeLand: ["schweiz", "schweizer eidgenossenschaft"], synonymeHauptstadt: ["bern"] },
@@ -36,11 +33,8 @@ const europaDatenbankTeil2 = [
     { nr: 23, land: "Spanien", hauptstadt: "Madrid", synonymeLand: ["spanien"], synonymeHauptstadt: ["madrid"] },
     { nr: 24, land: "Portugal", hauptstadt: "Lissabon", synonymeLand: ["portugal"], synonymeHauptstadt: ["lissabon"] },
     { nr: 25, land: "Italien", hauptstadt: "Rom", synonymeLand: ["italien"], synonymeHauptstadt: ["rom"] },
-    { nr: 26, land: "Griechenland", hauptstadt: "Athen", synonymeLand: ["griechenland"], synonymeHauptstadt: ["athen"]
+    { nr: 26, land: "Griechenland", hauptstadt: "Athen", synonymeLand: ["griechenland"], synonymeHauptstadt: ["athen"] }
 ];
-
-// Die Teile von europaDatenbank zusammenführen
-europaDatenbank.push(...europaDatenbankTeil2);
 
 // --- Nachbarländer von Deutschland ---
 const nachlaenderDatenbank = [

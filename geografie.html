@@ -23,9 +23,12 @@
         .input-row { display: none; gap: 8px; margin-bottom: 10px; align-items: center; }
         input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 1rem; box-sizing: border-box; }
         
+        .bulb-btn, .exit-btn { background: white; border: 2px solid #d69e2e; border-radius: 8px; width: 48px; height: 48px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .exit-btn { border-color: #e53e3e; }
+
         .action-btn { background: #d69e2e; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 5px; }
-        .action-btn:hover { background: #b7791f; }
         .next-btn { background: #3182ce; display: none; }
+        .tip-box { background: #fffaf0; border: 1px dashed #d69e2e; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #744210; margin-bottom: 10px; text-align: left; display: none; }
     </style>
 </head>
 <body>
@@ -59,7 +62,7 @@
             </select>
         </div>
 
-        <button class="action-btn" onclick="startGeografieTraining()">Training starten 🚀</button>
+        <button class="action-btn" onclick="startTraining()">Training starten 🚀</button>
     </div>
 
     <div class="stats-bar" id="stats-bar" style="display: none;">
@@ -74,32 +77,44 @@
     <div class="question-box" id="geo-question">
         <span id="question-text">Fragetext</span>
     </div>
+    
+    <div id="geo-tip" class="tip-box"></div>
 
     <div class="input-row" id="input-row">
-        <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkGeoAnswer()">
-        <button class="action-btn" onclick="checkGeoAnswer()" style="width: auto; margin:0;">Prüfen</button>
+        <input type="text" id="geo-answer" placeholder="Antwort eingeben..." onkeypress="if(event.key === 'Enter') checkAnswer()">
+        <button class="bulb-btn" onclick="showNextTip()" title="Tipp">💡</button>
+        <button class="exit-btn" onclick="endSessionEarly()" title="Beenden">☠️</button>
     </div>
 
-    <button class="action-btn next-btn" id="next-btn" onclick="proceedGeoNext()">Weiter ➡️</button>
+    <button class="action-btn" id="check-btn" style="display: none;" onclick="checkAnswer()">Antwort prüfen</button>
+    <button class="action-btn next-btn" id="next-btn" onclick="proceedNext()">Weiter ➡️</button>
 
     <p id="geo-feedback" style="font-weight: bold; margin-top: 10px;"></p>
 </div>
 
+<!-- Wichtig: Erst userConfig/Daten laden, dann die Logik -->
 <script src="geografie_daten.js"></script>
 <script>
+    // Lokale Benutzer-Konfiguration direkt in der HTML verfügbar
+    const activeUserConfig = (typeof userConfig !== 'undefined') ? userConfig : {
+        "King Knulwes": { rolle: "Kind" },
+        "Mini 14": { rolle: "Kind" },
+        "Queen Katherine": { rolle: "Kind" },
+        "Chef": { rolle: "Chef" }
+    };
+
     let activeQuestions = [];
     let currentIndex = 0;
-    let geoXP = parseInt(localStorage.getItem("geo_user_xp") || "0");
+    let userXP = parseInt(localStorage.getItem("geo_user_xp") || "0");
 
-    function updateGeoXP() {
-        let el = document.getElementById("user-xp");
-        if(el) el.textContent = geoXP;
+    function updateXPDisplay() {
+        let xpEl = document.getElementById("user-xp");
+        if(xpEl) xpEl.textContent = userXP;
     }
 
-    function startGeografieTraining() {
-        // Sicherheitscheck, ob die geografie_daten.js da ist
+    function startTraining() {
         if (typeof europaDatenbank === 'undefined') {
-            alert("Fehler: geografie_daten.js wurde nicht gefunden oder geladen!");
+            alert("Fehler: geografie_daten.js nicht geladen!");
             return;
         }
 
@@ -109,31 +124,31 @@
 
         if (topicKey === "europa_mix") {
             europaDatenbank.forEach(item => {
-                generatedPool.push({ prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, synonyms: item.synonymeHauptstadt || [] });
+                generatedPool.push({ prompt: `Was ist die Hauptstadt von ${item.land}?`, answer: item.hauptstadt, synonyms: item.synonymeHauptstadt || [], item: item });
             });
         } else if (topicKey === "nachlaender" && typeof nachlaenderDatenbank !== 'undefined') {
             nachlaenderDatenbank.forEach(n => {
-                generatedPool.push({ prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, synonyms: n.synonyme || [] });
+                generatedPool.push({ prompt: `Nenne ein Nachbarland von Deutschland:`, answer: n.land, synonyms: n.synonyme || [], item: { tipp: "Grenzt direkt an Deutschland" } });
             });
         } else if (topicKey === "fluesse" && typeof fluesseDatenbank !== 'undefined') {
             fluesseDatenbank.forEach(f => {
-                generatedPool.push({ prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, synonyms: f.synonyme || [] });
+                generatedPool.push({ prompt: `Welcher Fluss fließt: ${f.route}?`, answer: f.name, synonyms: f.synonyme || [], item: { tipp: f.info } });
             });
         } else if (topicKey === "gebirge" && typeof gebirgeDatenbank !== 'undefined') {
             gebirgeDatenbank.forEach(g => {
-                generatedPool.push({ prompt: `Welches Gebirge liegt in ${g.laender[0]}?`, answer: g.name, synonyms: g.synonyme || [] });
+                generatedPool.push({ prompt: `Welches Gebirge liegt in ${g.laender[0]}?`, answer: g.name, synonyms: g.synonyme || [], item: { tipp: "Länder: " + g.laender.join(", ") } });
             });
         } else if (topicKey === "meere" && typeof meereDatenbank !== 'undefined') {
             meereDatenbank.forEach(m => {
-                generatedPool.push({ prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, synonyms: [] });
+                generatedPool.push({ prompt: `Welches Meer liegt hier: ${m.lage}?`, answer: m.name, synonyms: [], item: { tipp: m.info } });
             });
         } else if (topicKey === "inseln" && typeof inselnDatenbank !== 'undefined') {
             inselnDatenbank.forEach(i => {
-                generatedPool.push({ prompt: `Welche Insel / Halbinsel gehört zu ${i.bezug || 'Europa'}?`, answer: i.name, synonyms: [] });
+                generatedPool.push({ prompt: `Welche Insel / Halbinsel gehört zu ${i.bezug || 'Europa'}?`, answer: i.name, synonyms: [], item: { tipp: i.tipp } });
             });
         } else if (topicKey === "verdichtung" && typeof verdichtungsraeumeDatenbank !== 'undefined') {
             verdichtungsraeumeDatenbank.forEach(v => {
-                generatedPool.push({ prompt: `Welcher Verdichtungsraum hat wichtige Städte wie ${v.städte[0]}?`, answer: v.name, synonyms: [] });
+                generatedPool.push({ prompt: `Welcher Verdichtungsraum hat wichtige Städte wie ${v.städte[0]}?`, answer: v.name, synonyms: [], item: { tipp: "Wirtschaftsraum" } });
             });
         }
 
@@ -142,26 +157,27 @@
         activeQuestions = generatedPool.slice(0, Math.min(limit, generatedPool.length));
 
         if (activeQuestions.length === 0) {
-            alert("Keine Fragen für diesen Bereich gefunden!");
+            alert("Keine Fragen für diesen Bereich verfügbar!");
             return;
         }
 
-        updateGeoXP();
+        updateXPDisplay();
         document.getElementById("setup-screen").style.display = "none";
         document.getElementById("stats-bar").style.display = "flex";
         document.getElementById("map-wrapper").style.display = "block";
         document.getElementById("geo-question").style.display = "block";
 
         currentIndex = 0;
-        loadGeoQuestion();
+        loadQuestion();
     }
 
-    function loadGeoQuestion() {
+    function loadQuestion() {
         document.getElementById("next-btn").style.display = "none";
+        document.getElementById("check-btn").style.display = "block";
         document.getElementById("input-row").style.display = "flex";
 
         if (currentIndex >= activeQuestions.length) {
-            showGeoEndScreen(`🎉 Geografie-Runde beendet!<br><br>⚡ Geografie-XP: ${geoXP}`);
+            showEndScreen(`🎉 Geografie-Runde beendet!<br><br>⚡ XP-Gesamt: ${userXP}`);
             return;
         }
 
@@ -170,30 +186,31 @@
         document.getElementById("current-q-num").textContent = currentIndex + 1;
         document.getElementById("total-q-num").textContent = activeQuestions.length;
 
+        document.getElementById("geo-tip").style.display = "none";
         document.getElementById("geo-feedback").textContent = "";
-        let ansInput = document.getElementById("geo-answer");
-        ansInput.value = "";
-        ansInput.focus();
+        document.getElementById("geo-answer").value = "";
+        document.getElementById("geo-answer").focus();
     }
 
-    function checkGeoAnswer() {
+    function checkAnswer() {
         let qData = activeQuestions[currentIndex];
         let userAnswer = document.getElementById("geo-answer").value.trim().toLowerCase();
         let allValid = [qData.answer, ...(qData.synonyms || [])].map(s => s.toLowerCase());
 
         document.getElementById("input-row").style.display = "none";
+        document.getElementById("check-btn").style.display = "none";
 
         if (allValid.includes(userAnswer)) {
-            geoXP += 1;
-            localStorage.setItem("geo_user_xp", geoXP);
-            updateGeoXP();
+            userXP += 1;
+            localStorage.setItem("geo_user_xp", userXP);
+            updateXPDisplay();
 
             document.getElementById("geo-feedback").style.color = "green";
             document.getElementById("geo-feedback").textContent = "Richtig! +1 XP 🌟";
 
             setTimeout(() => {
                 currentIndex++;
-                loadGeoQuestion();
+                loadQuestion();
             }, 1000);
         } else {
             document.getElementById("geo-feedback").style.color = "red";
@@ -202,12 +219,27 @@
         }
     }
 
-    function proceedGeoNext() {
+    function proceedNext() {
         currentIndex++;
-        loadGeoQuestion();
+        loadQuestion();
     }
 
-    function showGeoEndScreen(msg) {
+    function showNextTip() {
+        let qData = activeQuestions[currentIndex];
+        let tipBox = document.getElementById("geo-tip");
+        if (qData.item && qData.item.tipp) {
+            tipBox.style.display = "block";
+            tipBox.textContent = `💡 Tipp: ${qData.item.tipp}`;
+        }
+    }
+
+    function endSessionEarly() {
+        if (confirm("Wirklich beenden?")) {
+            showEndScreen("☠️ Runde beendet!");
+        }
+    }
+
+    function showEndScreen(msg) {
         document.querySelector(".container").innerHTML = `<h2>${msg}</h2><button class='action-btn' onclick='location.reload()'>Neue Runde 🔄</button><br><br><a href="index.html">⬅ Zurück zum Menü</a>`;
     }
 </script>
